@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@source "../../Views";
+@source "../js";
+
+@theme {
+    --color-oco-bg: #0f172a;
+    --color-oco-surface: #1e293b;
+    --color-oco-surface-2: #172033;
+    --color-oco-border: #334155;
+    --color-oco-text: #e2e8f0;
+    --color-oco-muted: #94a3b8;
+    --color-oco-up: #22c55e;
+    --color-oco-down: #ef4444;
+    --color-oco-warn: #f59e0b;
+    --color-oco-accent: #6366f1;
+}
