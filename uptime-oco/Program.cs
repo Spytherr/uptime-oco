@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using uptime_oco;
 
@@ -26,6 +27,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddHttpClient();
 builder.Services.AddOutputCache();
 builder.Services.AddSignalR();
@@ -46,9 +48,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseMiddleware<SetupCheckMiddleware>();
 app.UseAuthorization();
 
 app.UseOutputCache();

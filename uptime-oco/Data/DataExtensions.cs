@@ -27,10 +27,16 @@ public static class DataExtensions
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<UptimeOcoContext>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
         if (await context.Monitors.AnyAsync())
         {
             return;
+        }
+
+        if (!await roleManager.RoleExistsAsync("Admin"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("Admin"));
         }
 
         var admin = await userManager.FindByEmailAsync(AdminEmail);
@@ -49,6 +55,8 @@ public static class DataExtensions
                 var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
                 throw new InvalidOperationException($"Failed to create seed admin user: {errors}");
             }
+
+            await userManager.AddToRoleAsync(admin, "Admin");
         }
 
         var now = DateTime.UtcNow;
