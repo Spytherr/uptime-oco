@@ -11,7 +11,7 @@ using uptime_oco;
 namespace uptime_oco.Data.Migrations
 {
     [DbContext(typeof(UptimeOcoContext))]
-    [Migration("20260709185334_Init")]
+    [Migration("20260711161912_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -212,30 +212,6 @@ namespace uptime_oco.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("uptime_oco.Heartbeat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MonitorId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ReceivedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SourceIp")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MonitorId");
-
-                    b.HasIndex("ReceivedAt");
-
-                    b.ToTable("Heartbeats");
-                });
-
             modelBuilder.Entity("uptime_oco.Incident", b =>
                 {
                     b.Property<int>("Id")
@@ -276,14 +252,6 @@ namespace uptime_oco.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("GracePeriodSeconds")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("HeartbeatToken")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("IntervalSeconds")
                         .HasColumnType("INTEGER");
 
@@ -301,10 +269,8 @@ namespace uptime_oco.Data.Migrations
                     b.Property<int>("RetryThreshold")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
@@ -312,9 +278,6 @@ namespace uptime_oco.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("HeartbeatToken")
-                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -326,9 +289,6 @@ namespace uptime_oco.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ConfigJson")
-                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -440,17 +400,6 @@ namespace uptime_oco.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("uptime_oco.Heartbeat", b =>
-                {
-                    b.HasOne("uptime_oco.Monitor", "Monitor")
-                        .WithMany("Heartbeats")
-                        .HasForeignKey("MonitorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Monitor");
-                });
-
             modelBuilder.Entity("uptime_oco.Incident", b =>
                 {
                     b.HasOne("uptime_oco.Monitor", "Monitor")
@@ -504,8 +453,6 @@ namespace uptime_oco.Data.Migrations
 
             modelBuilder.Entity("uptime_oco.Monitor", b =>
                 {
-                    b.Navigation("Heartbeats");
-
                     b.Navigation("Incidents");
 
                     b.Navigation("PingResults");

@@ -23,7 +23,6 @@ public class SetupCheckMiddleware
         var path = context.Request.Path;
 
         if (path.StartsWithSegments("/Setup", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWithSegments("/api/heartbeat", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWithSegments("/Account", StringComparison.OrdinalIgnoreCase))
         {
             await _next(context);

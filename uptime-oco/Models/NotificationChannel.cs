@@ -10,8 +10,6 @@ public class NotificationChannel
 
     public required string Target { get; set; }
 
-    public string? ConfigJson { get; set; }
-
     public bool IsEnabled { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

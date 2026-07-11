@@ -62,27 +62,20 @@ public static class DataExtensions
         var now = DateTime.UtcNow;
         var rng = new Random(42);
 
-        var httpMonitors = new List<Monitor>
+        var monitors = new List<Monitor>
         {
-            new() { Name = "Google", Url = "https://www.google.com", Type = MonitorType.Http, IntervalSeconds = 60, UserId = admin.Id },
-            new() { Name = "GitHub", Url = "https://github.com", Type = MonitorType.Http, IntervalSeconds = 60, UserId = admin.Id },
-            new() { Name = "JSONPlaceholder API", Url = "https://jsonplaceholder.typicode.com/posts/1", Type = MonitorType.Http, IntervalSeconds = 120, UserId = admin.Id },
-            new() { Name = "HttpStat 200 OK", Url = "https://httpstat.us/200", Type = MonitorType.Http, IntervalSeconds = 60, UserId = admin.Id },
-            new() { Name = "HttpStat 500 Error", Url = "https://httpstat.us/500", Type = MonitorType.Http, IntervalSeconds = 60, UserId = admin.Id }
+            new() { Name = "Google", Url = "https://www.google.com", IntervalSeconds = 60, UserId = admin.Id },
+            new() { Name = "GitHub", Url = "https://github.com", IntervalSeconds = 60, UserId = admin.Id },
+            new() { Name = "JSONPlaceholder API", Url = "https://jsonplaceholder.typicode.com/posts/1", IntervalSeconds = 120, UserId = admin.Id },
+            new() { Name = "HttpStat 200 OK", Url = "https://httpstat.us/200", IntervalSeconds = 60, UserId = admin.Id },
+            new() { Name = "HttpStat 500 Error", Url = "https://httpstat.us/500", IntervalSeconds = 60, UserId = admin.Id }
         };
 
-        var heartbeatMonitors = new List<Monitor>
-        {
-            new() { Name = "Backup CronJob", Type = MonitorType.Heartbeat, GracePeriodSeconds = 3600, UserId = admin.Id },
-            new() { Name = "Daily Report Job", Type = MonitorType.Heartbeat, GracePeriodSeconds = 7200, UserId = admin.Id }
-        };
-
-        context.Monitors.AddRange(httpMonitors);
-        context.Monitors.AddRange(heartbeatMonitors);
+        context.Monitors.AddRange(monitors);
         await context.SaveChangesAsync();
 
         var pings = new List<PingResult>();
-        foreach (var monitor in httpMonitors)
+        foreach (var monitor in monitors)
         {
             var alwaysDown = monitor.Url!.Contains("/500");
             for (var i = 0; i < 100; i++)
@@ -105,35 +98,8 @@ public static class DataExtensions
 
         context.PingResults.AddRange(pings);
 
-        var backupJob = heartbeatMonitors[0];
-        var dailyJob = heartbeatMonitors[1];
-
-        var heartbeats = new List<Heartbeat>();
-        for (var i = 0; i < 20; i++)
-        {
-            heartbeats.Add(new Heartbeat
-            {
-                MonitorId = backupJob.Id,
-                ReceivedAt = now.AddHours(-i),
-                SourceIp = "203.0.113.10"
-            });
-        }
-
-        backupJob.LastCheckAt = now;
-
-        heartbeats.Add(new Heartbeat
-        {
-            MonitorId = dailyJob.Id,
-            ReceivedAt = now.AddHours(-30),
-            SourceIp = "203.0.113.20"
-        });
-
-        dailyJob.LastCheckAt = now.AddHours(-30);
-
-        context.Heartbeats.AddRange(heartbeats);
-
-        var http500 = httpMonitors.First(m => m.Url!.Contains("/500"));
-        var google = httpMonitors[0];
+        var http500 = monitors.First(m => m.Url!.Contains("/500"));
+        var google = monitors[0];
 
         context.Incidents.AddRange(
             new Incident

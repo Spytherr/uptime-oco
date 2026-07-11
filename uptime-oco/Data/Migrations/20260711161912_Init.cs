@@ -163,13 +163,10 @@ namespace uptime_oco.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Url = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Url = table.Column<string>(type: "TEXT", nullable: false),
                     IntervalSeconds = table.Column<int>(type: "INTEGER", nullable: false),
-                    GracePeriodSeconds = table.Column<int>(type: "INTEGER", nullable: false),
                     RetryThreshold = table.Column<int>(type: "INTEGER", nullable: false),
                     ConsecutiveFailures = table.Column<int>(type: "INTEGER", nullable: false),
-                    HeartbeatToken = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LastCheckAt = table.Column<DateTime>(type: "TEXT", nullable: true),
@@ -195,7 +192,6 @@ namespace uptime_oco.Data.Migrations
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
                     Target = table.Column<string>(type: "TEXT", nullable: false),
-                    ConfigJson = table.Column<string>(type: "TEXT", nullable: true),
                     IsEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: false)
@@ -207,27 +203,6 @@ namespace uptime_oco.Data.Migrations
                         name: "FK_NotificationChannels_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Heartbeats",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    MonitorId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ReceivedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SourceIp = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Heartbeats", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Heartbeats_Monitors_MonitorId",
-                        column: x => x.MonitorId,
-                        principalTable: "Monitors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -315,16 +290,6 @@ namespace uptime_oco.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Heartbeats_MonitorId",
-                table: "Heartbeats",
-                column: "MonitorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Heartbeats_ReceivedAt",
-                table: "Heartbeats",
-                column: "ReceivedAt");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Incidents_MonitorId",
                 table: "Incidents",
                 column: "MonitorId");
@@ -333,12 +298,6 @@ namespace uptime_oco.Data.Migrations
                 name: "IX_Incidents_StartedAt",
                 table: "Incidents",
                 column: "StartedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Monitors_HeartbeatToken",
-                table: "Monitors",
-                column: "HeartbeatToken",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Monitors_UserId",
@@ -378,9 +337,6 @@ namespace uptime_oco.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
-
-            migrationBuilder.DropTable(
-                name: "Heartbeats");
 
             migrationBuilder.DropTable(
                 name: "Incidents");

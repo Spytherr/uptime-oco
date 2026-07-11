@@ -10,8 +10,6 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
 
     public DbSet<PingResult> PingResults => Set<PingResult>();
 
-    public DbSet<Heartbeat> Heartbeats => Set<Heartbeat>();
-
     public DbSet<Incident> Incidents => Set<Incident>();
 
     public DbSet<NotificationChannel> NotificationChannels => Set<NotificationChannel>();
@@ -23,8 +21,6 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
         builder.Entity<Monitor>(entity =>
         {
             entity.Property(m => m.Name).HasMaxLength(200);
-            entity.Property(m => m.HeartbeatToken).HasMaxLength(64);
-            entity.HasIndex(m => m.HeartbeatToken).IsUnique();
 
             entity.HasOne(m => m.User)
                 .WithMany(u => u.Monitors)
@@ -39,16 +35,6 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
             entity.HasOne(p => p.Monitor)
                 .WithMany(m => m.PingResults)
                 .HasForeignKey(p => p.MonitorId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        builder.Entity<Heartbeat>(entity =>
-        {
-            entity.HasIndex(h => h.ReceivedAt);
-
-            entity.HasOne(h => h.Monitor)
-                .WithMany(m => m.Heartbeats)
-                .HasForeignKey(h => h.MonitorId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

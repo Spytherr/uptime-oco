@@ -28,6 +28,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddHttpClient();
 builder.Services.AddOutputCache();
 builder.Services.AddSignalR();
@@ -62,7 +63,7 @@ app.UseOutputCache();
 app.MapStaticAssets();
 app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
+        pattern: "{controller=Dashboard}/{action=Index}/{id?}")
     .WithStaticAssets();
 app.MapControllers();
 
