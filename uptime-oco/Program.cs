@@ -1,14 +1,11 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using uptime_oco;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("UptimeOcoContext")
     ?? "Data Source=uptime-oco.db";
-
-builder.Services.AddDbContext<UptimeOcoContext>(options => options.UseSqlServer(connectionString));
 
 builder.AddUptimeOcoDatabase(connectionString);
 

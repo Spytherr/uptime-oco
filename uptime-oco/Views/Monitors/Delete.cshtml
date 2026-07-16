@@ -1,0 +1,33 @@
+@model Monitor
+@{
+    ViewData["Title"] = "Delete Monitor";
+}
+
+<div class="max-w-2xl mx-auto space-y-6">
+    <h1 class="text-2xl font-bold">Delete Monitor</h1>
+
+    <div class="bg-oco-surface rounded-xl p-6 border border-oco-border">
+        <p class="text-oco-muted mb-4">Are you sure you want to delete this monitor? All associated ping results and incidents will also be removed.</p>
+
+        <div class="space-y-3 mb-6">
+            <div>
+                <span class="text-oco-muted text-sm">Name:</span>
+                <span class="font-medium ml-2">@Model.Name</span>
+            </div>
+            <div>
+                <span class="text-oco-muted text-sm">URL:</span>
+                <span class="font-medium ml-2 break-all">@Model.Url</span>
+            </div>
+        </div>
+
+        <form asp-action="Delete" method="post" class="flex gap-3">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="px-5 py-2.5 bg-oco-down text-white rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Yes, Delete
+            </button>
+            <a asp-action="Index" class="px-5 py-2.5 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>

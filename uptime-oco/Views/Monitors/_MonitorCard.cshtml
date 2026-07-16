@@ -1,0 +1,51 @@
+@model Monitor
+@{
+    var isUp = Model.ConsecutiveFailures < Model.RetryThreshold;
+    var statusColor = isUp ? "text-oco-up" : "text-oco-down";
+    var dotColor = isUp ? "bg-oco-up" : "bg-oco-down";
+    var statusLabel = isUp ? "UP" : "DOWN";
+}
+
+<div class="flex items-center justify-between p-4 bg-oco-surface rounded-xl border border-oco-border">
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full @dotColor"></span>
+            <span class="text-sm font-medium @statusColor">@statusLabel</span>
+        </div>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.Id"
+               class="font-medium text-oco-text hover:text-oco-accent no-underline">
+                @Model.Name
+            </a>
+            <p class="text-sm text-oco-muted">@Model.Url</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="text-right text-sm text-oco-muted">
+            <p>Every @Model.IntervalSeconds s</p>
+            <p>Retry: @Model.RetryThreshold</p>
+        </div>
+        <div class="flex items-center gap-2">
+            @if (Model.IsActive)
+            {
+                <span class="px-2 py-1 text-xs rounded bg-oco-up/10 text-oco-up">Active</span>
+            }
+            else
+            {
+                <span class="px-2 py-1 text-xs rounded bg-oco-muted/10 text-oco-muted">Paused</span>
+            }
+        </div>
+        <div class="flex items-center gap-1">
+            <a asp-action="Edit" asp-route-id="@Model.Id"
+               class="px-3 py-1.5 text-sm text-oco-muted hover:text-oco-text no-underline">Edit</a>
+            <form asp-action="ToggleActive" asp-route-id="@Model.Id" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="px-3 py-1.5 text-sm text-oco-muted hover:text-oco-warn">
+                    @(Model.IsActive ? "Pause" : "Resume")
+                </button>
+            </form>
+            <a asp-action="Delete" asp-route-id="@Model.Id"
+               class="px-3 py-1.5 text-sm text-oco-muted hover:text-oco-down no-underline">Delete</a>
+        </div>
+    </div>
+</div>
