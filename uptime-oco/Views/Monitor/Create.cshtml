@@ -1,0 +1,96 @@
+@model uptime_oco.Monitor
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Monitor</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Url" class="control-label"></label>
+                <input asp-for="Url" class="form-control" />
+                <span asp-validation-for="Url" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IntervalSeconds" class="control-label"></label>
+                <input asp-for="IntervalSeconds" class="form-control" />
+                <span asp-validation-for="IntervalSeconds" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="RetryThreshold" class="control-label"></label>
+                <input asp-for="RetryThreshold" class="form-control" />
+                <span asp-validation-for="RetryThreshold" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ConsecutiveFailures" class="control-label"></label>
+                <input asp-for="ConsecutiveFailures" class="form-control" />
+                <span asp-validation-for="ConsecutiveFailures" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IsActive" class="control-label"></label>
+                <input asp-for="IsActive" class="form-check-input" />
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CreatedAt" class="control-label"></label>
+                <input asp-for="CreatedAt" class="form-control" />
+                <span asp-validation-for="CreatedAt" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastCheckAt" class="control-label"></label>
+                <input asp-for="LastCheckAt" class="form-control" />
+                <span asp-validation-for="LastCheckAt" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="UserId" class="control-label"></label>
+                <input asp-for="UserId" class="form-control" />
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="User" class="control-label"></label>
+                <input asp-for="User" class="form-control" />
+                <span asp-validation-for="User" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PingResults" class="control-label"></label>
+                <input asp-for="PingResults" class="form-control" />
+                <span asp-validation-for="PingResults" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Incidents" class="control-label"></label>
+                <input asp-for="Incidents" class="form-control" />
+                <span asp-validation-for="Incidents" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
