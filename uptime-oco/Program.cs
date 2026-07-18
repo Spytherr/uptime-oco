@@ -29,7 +29,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddHttpClient();
+builder.Services.AddScoped<IMonitoringService, MonitoringService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddHostedService<MonitorBackgroundService>();
+builder.Services.AddHttpClient("monitor");
+builder.Services.AddHttpClient("notification");
 builder.Services.AddOutputCache();
 builder.Services.AddSignalR();
 
@@ -66,5 +70,6 @@ app.MapControllerRoute(
         pattern: "{controller=Dashboard}/{action=Index}/{id?}")
     .WithStaticAssets();
 app.MapControllers();
+app.MapHub<MonitorHub>("/hubs/monitor");
 
 app.Run();
