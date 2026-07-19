@@ -1,0 +1,109 @@
+@model Incident
+@{
+    ViewData["Title"] = "Incident Details";
+    var isResolved = Model.ResolvedAt.HasValue;
+    var duration = isResolved
+        ? Model.ResolvedAt!.Value - Model.StartedAt
+        : DateTime.UtcNow - Model.StartedAt;
+}
+
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Incident #@Model.Id</h1>
+        <a asp-action="Index" class="px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+            Back to Incidents
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Monitor</p>
+            <a asp-controller="Monitors" asp-action="Details" asp-route-id="@Model.MonitorId"
+               class="font-medium text-oco-accent no-underline mt-1 block">
+                @Model.Monitor?.Name
+            </a>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Status</p>
+            @if (isResolved)
+            {
+                <span class="px-3 py-1 text-sm rounded bg-oco-up/10 text-oco-up font-medium mt-1 inline-block">Resolved</span>
+            }
+            else
+            {
+                <span class="px-3 py-1 text-sm rounded bg-oco-down/10 text-oco-down font-medium mt-1 inline-block">Open</span>
+            }
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Started</p>
+            <p class="font-medium mt-1">@Model.StartedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm:ss")</p>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Resolved</p>
+            <p class="font-medium mt-1">
+                @(isResolved ? Model.ResolvedAt!.Value.ToLocalTime().ToString("MMM dd, yyyy HH:mm:ss") : "—")
+            </p>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Duration</p>
+            <p class="font-medium mt-1">@(duration.TotalMinutes < 1 ? "<1 min" : $"{Math.Floor(duration.TotalHours)}h {duration.Minutes}m")</p>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Reason</p>
+            <p class="font-medium mt-1">@Model.Reason</p>
+        </div>
+    </div>
+
+    @if (!isResolved)
+    {
+        <form asp-action="Resolve" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="px-5 py-2.5 bg-oco-up/10 text-oco-up rounded-lg hover:bg-oco-up/20 transition-colors font-medium">
+                Mark as Resolved
+            </button>
+        </form>
+    }
+
+    <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <h2 class="text-lg font-semibold mb-4">Ping Results Around Incident</h2>
+        @if (Model.Monitor?.PingResults.Count > 0)
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-oco-muted text-left border-b border-oco-border">
+                            <th class="pb-2 pr-4">Time</th>
+                            <th class="pb-2 pr-4">Status</th>
+                            <th class="pb-2 pr-4">HTTP Code</th>
+                            <th class="pb-2">Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ping in Model.Monitor!.PingResults)
+                        {
+                            <tr class="border-b border-oco-border/50">
+                                <td class="py-2 pr-4 text-oco-muted">@ping.CheckedAt.ToLocalTime().ToString("MMM dd, HH:mm:ss")</td>
+                                <td class="py-2 pr-4">
+                                    @if (ping.IsSuccess)
+                                    {
+                                        <span class="text-oco-up">OK</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-oco-down">FAIL</span>
+                                    }
+                                </td>
+                                <td class="py-2 pr-4 text-oco-muted">@(ping.HttpStatusCode?.ToString() ?? "—")</td>
+                                <td class="py-2 text-oco-muted">@(ping.ResponseTimeMs.HasValue ? $"{ping.ResponseTimeMs} ms" : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-oco-muted text-sm">No ping results available.</p>
+        }
+    </div>
+</div>

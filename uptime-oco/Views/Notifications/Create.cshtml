@@ -1,0 +1,47 @@
+@model CreateNotificationViewModel
+@{
+    ViewData["Title"] = "Create Notification Channel";
+}
+
+<div class="max-w-2xl mx-auto space-y-6">
+    <h1 class="text-2xl font-bold">Create Notification Channel</h1>
+
+    <form asp-action="Create" method="post" class="space-y-5">
+        <div asp-validation-summary="ModelOnly" class="text-oco-down text-sm"></div>
+
+        <div>
+            <label asp-for="Name" class="block text-sm font-medium text-oco-muted mb-1"></label>
+            <input asp-for="Name" placeholder="e.g. My Discord Server" class="w-full px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-text placeholder-oco-muted focus:outline-none focus:border-oco-accent" />
+            <span asp-validation-for="Name" class="text-oco-down text-sm mt-1 block"></span>
+        </div>
+
+        <div>
+            <label asp-for="Type" class="block text-sm font-medium text-oco-muted mb-1"></label>
+            <select asp-for="Type" asp-items="Html.GetEnumSelectList<NotificationType>()" class="w-full px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-text focus:outline-none focus:border-oco-accent">
+            </select>
+            <span asp-validation-for="Type" class="text-oco-down text-sm mt-1 block"></span>
+        </div>
+
+        <div>
+            <label asp-for="Target" class="block text-sm font-medium text-oco-muted mb-1"></label>
+            <input asp-for="Target" placeholder="https://discord.com/api/webhooks/..." class="w-full px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-text placeholder-oco-muted focus:outline-none focus:border-oco-accent" />
+            <span asp-validation-for="Target" class="text-oco-down text-sm mt-1 block"></span>
+        </div>
+
+        <div>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input asp-for="IsEnabled" type="checkbox" class="w-5 h-5 rounded border-oco-border bg-oco-surface text-oco-accent focus:ring-oco-accent" />
+                <span class="text-sm text-oco-text">Enabled</span>
+            </label>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="px-5 py-2.5 bg-oco-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Create Channel
+            </button>
+            <a asp-action="Index" class="px-5 py-2.5 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>

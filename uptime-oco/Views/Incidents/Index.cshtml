@@ -1,0 +1,96 @@
+@model PaginatedList<Incident>
+@{
+    ViewData["Title"] = "Incidents";
+    var filter = ViewData["Filter"] as string;
+}
+
+<div class="space-y-6">
+    <h1 class="text-2xl font-bold">Incidents</h1>
+
+    <div class="flex gap-2">
+        <a asp-action="Index" asp-route-filter=""
+           class="px-4 py-2 rounded-lg text-sm no-underline @(string.IsNullOrEmpty(filter) ? "bg-oco-accent text-white" : "bg-oco-surface border border-oco-border text-oco-muted hover:text-oco-text")">
+            All
+        </a>
+        <a asp-action="Index" asp-route-filter="open"
+           class="px-4 py-2 rounded-lg text-sm no-underline @(filter == "open" ? "bg-oco-down text-white" : "bg-oco-surface border border-oco-border text-oco-muted hover:text-oco-text")">
+            Open
+        </a>
+        <a asp-action="Index" asp-route-filter="resolved"
+           class="px-4 py-2 rounded-lg text-sm no-underline @(filter == "resolved" ? "bg-oco-up text-white" : "bg-oco-surface border border-oco-border text-oco-muted hover:text-oco-text")">
+            Resolved
+        </a>
+    </div>
+
+    <div class="space-y-3">
+        @foreach (var incident in Model.Items)
+        {
+            var isResolved = incident.ResolvedAt.HasValue;
+            var borderColor = isResolved ? "border-oco-up/30" : "border-oco-down/30";
+            var statusBg = isResolved ? "bg-oco-up/10" : "bg-oco-down/10";
+            var statusText = isResolved ? "text-oco-up" : "text-oco-down";
+            var statusLabel = isResolved ? "Resolved" : "Open";
+            var duration = isResolved
+                ? (incident.ResolvedAt!.Value - incident.StartedAt)
+                : DateTime.UtcNow - incident.StartedAt;
+
+            <div class="flex items-center justify-between p-4 bg-oco-surface rounded-xl border @borderColor">
+                <div class="flex items-center gap-4">
+                    <span class="px-2 py-1 text-xs rounded @statusBg @statusText font-medium">@statusLabel</span>
+                    <div>
+                        <a asp-action="Details" asp-route-id="@incident.Id"
+                           class="font-medium text-oco-text hover:text-oco-accent no-underline">
+                            @incident.Monitor?.Name
+                        </a>
+                        <p class="text-sm text-oco-muted">@incident.Reason</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right text-sm text-oco-muted">
+                        <p>Started: @incident.StartedAt.ToLocalTime().ToString("MMM dd, HH:mm")</p>
+                        <p>Duration: @(duration.TotalMinutes < 1 ? "<1m" : $"{Math.Floor(duration.TotalMinutes)}m {duration.Seconds}s")</p>
+                    </div>
+                    @if (!isResolved)
+                    {
+                        <form asp-action="Resolve" asp-route-id="@incident.Id" method="post" class="inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="px-3 py-1.5 text-sm bg-oco-up/10 text-oco-up rounded-lg hover:bg-oco-up/20 transition-colors">
+                                Resolve
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="flex items-center justify-center gap-2 pt-4">
+            @if (Model.HasPreviousPage)
+            {
+                <a asp-action="Index" asp-route-filter="@filter" asp-route-page="@(Model.PageIndex - 1)"
+                   class="px-3 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                    Prev
+                </a>
+            }
+            <span class="px-4 py-2 text-oco-muted text-sm">
+                Page @Model.PageIndex of @Model.TotalPages
+            </span>
+            @if (Model.HasNextPage)
+            {
+                <a asp-action="Index" asp-route-filter="@filter" asp-route-page="@(Model.PageIndex + 1)"
+                   class="px-3 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                    Next
+                </a>
+            }
+        </div>
+    }
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="text-center py-12 text-oco-muted">
+            <p>No incidents found.</p>
+        </div>
+    }
+</div>
