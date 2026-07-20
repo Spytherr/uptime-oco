@@ -22,6 +22,13 @@ public class MonitoringService(
 
     public async Task<PingResult> CheckMonitorAsync(Monitor monitor, CancellationToken cancellationToken = default)
     {
+        var ping = await PerformHttpCheckAsync(monitor, cancellationToken);
+        await ProcessPingResultAsync(monitor, ping, cancellationToken);
+        return ping;
+    }
+
+    private async Task<PingResult> PerformHttpCheckAsync(Monitor monitor, CancellationToken cancellationToken)
+    {
         var sw = Stopwatch.StartNew();
         PingResult ping;
 
@@ -67,6 +74,11 @@ public class MonitoringService(
             };
         }
 
+        return ping;
+    }
+
+    private async Task ProcessPingResultAsync(Monitor monitor, PingResult ping, CancellationToken cancellationToken)
+    {
         context.PingResults.Add(ping);
 
         monitor.LastCheckAt = ping.CheckedAt;
@@ -114,30 +126,38 @@ public class MonitoringService(
                 resolvedAt = incident.ResolvedAt
             }, cancellationToken);
         }
-
-        return ping;
     }
 
     public async Task CheckAllMonitorsAsync(CancellationToken cancellationToken = default)
     {
+        var now = DateTime.UtcNow;
+
         var monitors = await context.Monitors
-            .Where(m => m.IsActive)
+            .Where(m => m.IsActive && (m.LastCheckAt == null || m.LastCheckAt.Value.AddSeconds(m.IntervalSeconds) <= now))
             .ToListAsync(cancellationToken);
 
-        logger.LogInformation("Checking {Count} active monitors", monitors.Count);
+        if (monitors.Count == 0)
+        {
+            return;
+        }
 
-        foreach (var monitor in monitors)
+        logger.LogInformation("Checking {Count} due monitors", monitors.Count);
+
+        var checkTasks = monitors.Select(m => PerformHttpCheckAsync(m, cancellationToken)).ToList();
+        var results = await Task.WhenAll(checkTasks);
+
+        foreach (var (monitor, ping) in monitors.Zip(results))
         {
             if (cancellationToken.IsCancellationRequested)
                 break;
 
             try
             {
-                await CheckMonitorAsync(monitor, cancellationToken);
+                await ProcessPingResultAsync(monitor, ping, cancellationToken);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error checking monitor {MonitorId}", monitor.Id);
+                logger.LogError(ex, "Error processing result for monitor {MonitorId}", monitor.Id);
             }
         }
     }

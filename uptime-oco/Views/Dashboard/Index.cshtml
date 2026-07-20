@@ -5,7 +5,7 @@
         .OrderBy(p => p.CheckedAt)
         .Select(p => new
         {
-            checkedAt = p.CheckedAt,
+            checkedAt = DateTime.SpecifyKind(p.CheckedAt, DateTimeKind.Utc),
             responseTimeMs = p.ResponseTimeMs,
             monitorId = p.MonitorId,
             monitorName = p.MonitorName
@@ -66,7 +66,7 @@
         <div class="space-y-3">
             @foreach (var monitor in Model.MonitorStatuses)
             {
-                <div class="flex items-center justify-between p-4 bg-oco-surface-2 rounded-lg border border-oco-border">
+                <div class="flex items-center justify-between p-4 bg-oco-surface-2 rounded-lg border border-oco-border transition-all duration-300" data-monitor-id="@monitor.Id">
                     <div class="flex items-center gap-4">
                         <partial name="_StatusBadge" model="monitor" />
                         <div>
@@ -80,12 +80,13 @@
                     <div class="text-right text-sm text-oco-muted">
                         @if (monitor.LastCheckAt.HasValue)
                         {
-                            <p>Last check: @monitor.LastCheckAt.Value.ToLocalTime().ToString("HH:mm:ss")</p>
+                            <p data-last-check>Last check: @monitor.LastCheckAt.Value.ToLocalTime().ToString("HH:mm:ss")</p>
                         }
-                        @if (monitor.LastResponseTimeMs.HasValue)
+                        else
                         {
-                            <p>@monitor.LastResponseTimeMs ms</p>
+                            <p data-last-check></p>
                         }
+                        <p data-response-time>@(monitor.LastResponseTimeMs.HasValue ? $"{monitor.LastResponseTimeMs} ms" : "")</p>
                         <p class="mt-1">
                             <span class="@(monitor.UptimePercent >= 99 ? "text-oco-up" : monitor.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down")">
                                 @monitor.UptimePercent% uptime

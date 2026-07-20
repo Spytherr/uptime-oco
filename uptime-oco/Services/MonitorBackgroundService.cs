@@ -8,7 +8,7 @@ public class MonitorBackgroundService(
     IServiceProvider serviceProvider,
     ILogger<MonitorBackgroundService> logger) : BackgroundService
 {
-    private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(5);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

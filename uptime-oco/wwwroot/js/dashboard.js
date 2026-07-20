@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var responseTimeEl = document.querySelector('#responseTimeChart');
     var responseTimeChart;
+    var statusCodeChart;
     var currentResponseTimePoints = [];
 
     function escapeHtml(value) {
@@ -217,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var statusCodeEl = document.querySelector('#statusCodeChart');
     if (statusCodeEl && data.statusCodes && data.statusCodes.length > 0) {
-        var statusCodeChart = new ApexCharts(statusCodeEl, {
+        statusCodeChart = new ApexCharts(statusCodeEl, {
             chart: {
                 type: 'donut',
                 height: 300,
@@ -257,5 +258,149 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
         statusCodeChart.render();
+    }
+
+    function showToast(title, message, type) {
+        var container = document.querySelector('#toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+            document.body.appendChild(container);
+        }
+
+        var bgColor = type === 'down' ? 'bg-oco-down/90' : 'bg-oco-up/90';
+        var icon = type === 'down' ? '\uD83D\uDD34' : '\u2705';
+
+        var toast = document.createElement('div');
+        toast.className = bgColor + ' text-white rounded-lg px-4 py-3 shadow-lg max-w-sm transition-all duration-300 opacity-0 translate-y-2';
+        toast.innerHTML = '<div class="flex items-start gap-3">' +
+            '<span class="text-lg">' + icon + '</span>' +
+            '<div><p class="font-medium text-sm">' + escapeHtml(title) + '</p>' +
+            '<p class="text-sm opacity-90 mt-1">' + escapeHtml(message) + '</p></div></div>';
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(function () {
+            toast.classList.remove('opacity-0', 'translate-y-2');
+        });
+
+        setTimeout(function () {
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(function () { toast.remove(); }, 300);
+        }, 5000);
+    }
+
+    function updateMonitorCard(payload) {
+        var cards = document.querySelectorAll('[data-monitor-id]');
+        cards.forEach(function (card) {
+            if (String(card.dataset.monitorId) !== String(payload.monitorId)) {
+                return;
+            }
+
+            var dot = card.querySelector('[data-status-dot]');
+            var label = card.querySelector('[data-status-label]');
+            if (dot && label) {
+                if (payload.isSuccess) {
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-oco-up ' + dot.className.split(' ').filter(function (c) { return c.startsWith('animate-'); }).join(' ');
+                    label.className = 'text-sm font-medium text-oco-up';
+                    label.textContent = 'UP';
+                } else {
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-oco-down ' + dot.className.split(' ').filter(function (c) { return c.startsWith('animate-'); }).join(' ');
+                    label.className = 'text-sm font-medium text-oco-down';
+                    label.textContent = 'DOWN';
+                }
+            }
+
+            var lastCheck = card.querySelector('[data-last-check]');
+            if (lastCheck && payload.checkedAt) {
+                var dt = new Date(payload.checkedAt);
+                lastCheck.textContent = 'Last check: ' + dt.toLocaleTimeString();
+            }
+
+            var respTime = card.querySelector('[data-response-time]');
+            if (respTime) {
+                respTime.textContent = payload.responseTimeMs != null ? payload.responseTimeMs + ' ms' : '';
+            }
+
+            card.classList.add('ring-2', 'ring-oco-accent', 'ring-offset-2', 'ring-offset-oco-surface');
+            setTimeout(function () {
+                card.classList.remove('ring-2', 'ring-oco-accent', 'ring-offset-2', 'ring-offset-oco-surface');
+            }, 1000);
+        });
+    }
+
+    if (typeof signalR !== 'undefined') {
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/hubs/monitor')
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on('PingReceived', function (payload) {
+            updateMonitorCard(payload);
+
+            if (responseTimeChart && payload.responseTimeMs != null) {
+                var selectedId = monitorSelect ? monitorSelect.value : '';
+                if (selectedId === '' || String(selectedId) === String(payload.monitorId)) {
+                    var point = {
+                        x: new Date(payload.checkedAt).getTime(),
+                        y: payload.responseTimeMs,
+                        monitorId: payload.monitorId,
+                        monitorName: payload.monitorName
+                    };
+                    currentResponseTimePoints.push(point);
+                    currentResponseTimePoints.sort(function (a, b) { return a.x - b.x; });
+
+                    var globals = responseTimeChart.w.globals;
+                    var zoomMin = globals.minX;
+                    var zoomMax = globals.maxX;
+
+                    responseTimeChart.updateSeries([{
+                        name: selectedMonitorName(selectedId),
+                        data: currentResponseTimePoints
+                    }], false);
+
+                    if (zoomMax - zoomMin < (currentResponseTimePoints[currentResponseTimePoints.length - 1].x - currentResponseTimePoints[0].x) - 1000) {
+                        responseTimeChart.zoomX(zoomMin, zoomMax);
+                    }
+                }
+            }
+
+            if (statusCodeChart && payload.httpStatusCode != null) {
+                var sc = data.statusCodes.find(function (d) { return d.statusCode === payload.httpStatusCode; });
+                if (!sc) {
+                    sc = { statusCode: payload.httpStatusCode, count: 0, monitors: [] };
+                    data.statusCodes.push(sc);
+                }
+                sc.count++;
+
+                var monitorEntry = sc.monitors.find(function (m) { return m.monitorName === payload.monitorName; });
+                if (!monitorEntry) {
+                    monitorEntry = { monitorName: payload.monitorName, count: 0 };
+                    sc.monitors.push(monitorEntry);
+                }
+                monitorEntry.count++;
+
+                data.statusCodes.sort(function (a, b) { return b.count - a.count; });
+
+                statusCodeChart.updateSeries(
+                    data.statusCodes.map(function (d) { return d.count; }),
+                    false
+                );
+                statusCodeChart.updateOptions({
+                    labels: data.statusCodes.map(function (d) { return d.statusCode.toString(); })
+                });
+            }
+        });
+
+        connection.on('IncidentUpdate', function (payload) {
+            var title = payload.isResolved ? 'Monitor Recovered' : 'Monitor Down';
+            var message = payload.monitorName + (payload.isResolved ? ' is back up' : ' is down') + ' — ' + payload.reason;
+            showToast(title, message, payload.isResolved ? 'up' : 'down');
+        });
+
+        connection.start().catch(function (err) {
+            console.error('SignalR connection failed:', err);
+        });
     }
 });

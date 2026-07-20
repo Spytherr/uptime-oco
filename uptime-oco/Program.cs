@@ -73,3 +73,5 @@ app.MapControllers();
 app.MapHub<MonitorHub>("/hubs/monitor");
 
 app.Run();
+
+public partial class Program { }
