@@ -14,6 +14,7 @@ public class DashboardViewModel
 
 public class ResponseTimePoint
 {
+    public int MonitorId { get; set; }
     public DateTime CheckedAt { get; set; }
     public int ResponseTimeMs { get; set; }
     public string MonitorName { get; set; } = string.Empty;
@@ -37,6 +38,7 @@ public class MonitorStatusDto
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
+    public int IntervalSeconds { get; set; }
     public bool IsUp { get; set; }
     public bool IsActive { get; set; }
     public DateTime? LastCheckAt { get; set; }

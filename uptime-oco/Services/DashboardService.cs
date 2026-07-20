@@ -47,6 +47,7 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
                 Id = m.Id,
                 Name = m.Name,
                 Url = m.Url,
+                IntervalSeconds = m.IntervalSeconds,
                 IsUp = isUp,
                 IsActive = m.IsActive,
                 LastCheckAt = m.LastCheckAt,
@@ -73,6 +74,7 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
             .OrderBy(p => p.CheckedAt)
             .Select(p => new ResponseTimePoint
             {
+                MonitorId = p.MonitorId,
                 CheckedAt = p.CheckedAt,
                 ResponseTimeMs = p.ResponseTimeMs!.Value,
                 MonitorName = monitors.First(m => m.Id == p.MonitorId).Name
