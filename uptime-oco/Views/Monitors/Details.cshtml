@@ -5,6 +5,10 @@
     var statusColor = isUp ? "text-oco-up" : "text-oco-down";
     var dotColor = isUp ? "bg-oco-up" : "bg-oco-down";
     var statusLabel = isUp ? "UP" : "DOWN";
+    var totalPings = Model.PingResults.Count;
+    var successPings = Model.PingResults.Count(p => p.IsSuccess);
+    var uptimePercent = totalPings > 0 ? Math.Round((double)successPings / totalPings * 100, 2) : 100;
+    var uptimeColor = uptimePercent >= 99 ? "text-oco-up" : uptimePercent >= 90 ? "text-oco-warn" : "text-oco-down";
 }
 
 <div class="space-y-6">
@@ -17,6 +21,12 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            <form asp-action="ToggleActive" asp-route-id="@Model.Id" asp-route-returnUrl="@Url.Action("Details", "Monitors", new { id = Model.Id })" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="class= px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                    @(Model.IsActive ? "Pause" : "Resume")
+                </button>
+            </form>
             <a asp-action="Edit" asp-route-id="@Model.Id" class="px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
                 Edit
             </a>
@@ -41,7 +51,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-3 gap-4">
         <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
             <p class="text-oco-muted text-sm">Consecutive Failures</p>
             <p class="text-2xl font-bold mt-1 @(Model.ConsecutiveFailures > 0 ? "text-oco-down" : "text-oco-up")">
@@ -52,6 +62,12 @@
             <p class="text-oco-muted text-sm">Status</p>
             <p class="text-2xl font-bold mt-1 @(Model.IsActive ? "text-oco-up" : "text-oco-muted")">
                 @(Model.IsActive ? "Active" : "Paused")
+            </p>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Uptime (last 50 pings)</p>
+            <p class="text-2xl font-bold mt-1 @uptimeColor">
+                @uptimePercent%
             </p>
         </div>
     </div>

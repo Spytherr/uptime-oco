@@ -27,4 +27,6 @@ public class Monitor
     public ICollection<PingResult> PingResults { get; set; } = [];
 
     public ICollection<Incident> Incidents { get; set; } = [];
+
+    public double UptimePercent { get; set; } = 100;
 }

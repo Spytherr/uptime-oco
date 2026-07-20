@@ -35,6 +35,12 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
             var lastPing = recentPings.FirstOrDefault(p => p.MonitorId == m.Id);
             var hasOpenIncident = openIncidents.Contains(m.Id);
             var isUp = lastPing is not null && lastPing.IsSuccess && !hasOpenIncident;
+            var monitorPings = recentPings.Where(p => p.MonitorId == m.Id).ToList();
+            var monitorTotal = monitorPings.Count;
+            var monitorSuccess = monitorPings.Count(p => p.IsSuccess);
+            var monitorUptime = monitorTotal > 0
+                ? Math.Round((double)monitorSuccess / monitorTotal * 100, 2)
+                : 100;
 
             return new MonitorStatusDto
             {
@@ -45,7 +51,8 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
                 IsActive = m.IsActive,
                 LastCheckAt = m.LastCheckAt,
                 LastResponseTimeMs = lastPing?.ResponseTimeMs,
-                ConsecutiveFailures = m.ConsecutiveFailures
+                ConsecutiveFailures = m.ConsecutiveFailures,
+                UptimePercent = monitorUptime
             };
         }).ToList();
 
@@ -75,7 +82,16 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
         var statusCodeDist = recentPings
             .Where(p => p.HttpStatusCode.HasValue)
             .GroupBy(p => p.HttpStatusCode!.Value)
-            .Select(g => new StatusCodeCount { StatusCode = g.Key, Count = g.Count() })
+            .Select(g => new StatusCodeCount
+            {
+                StatusCode = g.Key,
+                Count = g.Count(),
+                Monitors = g
+                    .GroupBy(p => monitors.First(m => m.Id == p.MonitorId).Name)
+                    .Select(mg => new StatusCodeMonitorCount { MonitorName = mg.Key, Count = mg.Count() })
+                    .OrderByDescending(mg => mg.Count)
+                    .ToList()
+            })
             .OrderByDescending(s => s.Count)
             .ToList();
 

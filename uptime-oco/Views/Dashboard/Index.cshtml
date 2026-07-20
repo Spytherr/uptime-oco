@@ -34,7 +34,12 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-oco-surface rounded-xl p-5 border border-oco-border">
-            <h2 class="text-lg font-semibold mb-4">Response Time (ms)</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">Response Time (ms)</h2>
+                <button id="resetZoomBtn" class="px-3 py-1.5 text-sm bg-oco-surface-2 border border-oco-border rounded-lg text-oco-muted hover:text-oco-text transition-colors">
+                    Reset Zoom
+                </button>
+            </div>
             <div id="responseTimeChart"></div>
         </div>
         <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
@@ -68,6 +73,11 @@
                         {
                             <p>@monitor.LastResponseTimeMs ms</p>
                         }
+                        <p class="mt-1">
+                            <span class="@(monitor.UptimePercent >= 99 ? "text-oco-up" : monitor.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down")">
+                                @monitor.UptimePercent% uptime
+                            </span>
+                        </p>
                     </div>
                 </div>
             }

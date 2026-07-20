@@ -42,7 +42,7 @@ public class AccountController(
 
         if (result.Succeeded)
         {
-            return Redirect(returnUrl ?? Url.Action("Index", "Home") ?? "/");
+            return Redirect(returnUrl ?? Url.Action("Index", "Dashboard") ?? "/");
         }
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");

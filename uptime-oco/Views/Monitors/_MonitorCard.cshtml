@@ -24,6 +24,11 @@
         <div class="text-right text-sm text-oco-muted">
             <p>Every @Model.IntervalSeconds s</p>
             <p>Retry: @Model.RetryThreshold</p>
+            <p class="mt-1">
+                <span class="@(Model.UptimePercent >= 99 ? "text-oco-up" : Model.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down")">
+                    @Model.UptimePercent% uptime
+                </span>
+            </p>
         </div>
         <div class="flex items-center gap-2">
             @if (Model.IsActive)

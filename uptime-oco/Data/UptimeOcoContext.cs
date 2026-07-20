@@ -21,6 +21,7 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
         builder.Entity<Monitor>(entity =>
         {
             entity.Property(m => m.Name).HasMaxLength(200);
+            entity.Ignore(m => m.UptimePercent);
 
             entity.HasOne(m => m.User)
                 .WithMany(u => u.Monitors)

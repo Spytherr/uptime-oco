@@ -28,6 +28,22 @@ public class MonitorsController(
         var pageSize = 10;
         var paginated = await PaginatedList<Monitor>.CreateAsync(query, page, pageSize);
 
+        var monitorIds = paginated.Items.Select(m => m.Id).ToList();
+        var pingStats = await context.PingResults
+            .AsNoTracking()
+            .Where(p => monitorIds.Contains(p.MonitorId))
+            .GroupBy(p => p.MonitorId)
+            .Select(g => new { MonitorId = g.Key, Total = g.Count(), Success = g.Count(p => p.IsSuccess) })
+            .ToListAsync();
+
+        foreach (var monitor in paginated.Items)
+        {
+            var stats = pingStats.FirstOrDefault(p => p.MonitorId == monitor.Id);
+            monitor.UptimePercent = stats is not null && stats.Total > 0
+                ? Math.Round((double)stats.Success / stats.Total * 100, 2)
+                : 100;
+        }
+
         ViewData["Search"] = search;
         return View(paginated);
     }
@@ -180,7 +196,7 @@ public class MonitorsController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ToggleActive(int id)
+    public async Task<IActionResult> ToggleActive(int id, string? returnUrl = null)
     {
         var userId = userManager.GetUserId(User);
         var monitor = await context.Monitors
@@ -193,6 +209,11 @@ public class MonitorsController(
 
         monitor.IsActive = !monitor.IsActive;
         await context.SaveChangesAsync();
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
 
         return RedirectToAction(nameof(Index));
     }

@@ -15,7 +15,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 type: 'line',
                 height: 300,
                 background: 'transparent',
-                toolbar: { show: false }
+                toolbar: {
+                    show: true,
+                    tools: {
+                        zoom: true,
+                        zoomin: true,
+                        zoomout: true,
+                        pan: false,
+                        reset: false,
+                        download: false
+                    },
+                    color: '#94a3b8',
+                    background: '#1e293b'
+                },
+                zoom: {
+                    enabled: true
+                }
             },
             series: [{
                 name: 'Response Time (ms)',
@@ -44,6 +59,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
         responseTimeChart.render();
+
+        var resetBtn = document.querySelector('#resetZoomBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                responseTimeChart.resetSeries();
+            });
+        }
     }
 
     var statusCodeEl = document.querySelector('#statusCodeChart');
@@ -62,7 +84,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 labels: { colors: '#94a3b8' }
             },
             tooltip: {
-                theme: 'dark'
+                theme: 'dark',
+                custom: function (opts) {
+                    var idx = opts.seriesIndex;
+                    var sc = data.statusCodes[idx];
+                    var monitors = sc.monitors || [];
+
+                    var html = '<div style="padding: 10px; min-width: 200px;">';
+                    html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">';
+                    html += '<b style="font-size: 14px;">HTTP ' + sc.statusCode + '</b>';
+                    html += '<span style="color: #94a3b8; font-size: 13px;">' + sc.count + ' total</span>';
+                    html += '</div>';
+                    html += '<div style="border-top: 1px solid #334155; margin-bottom: 6px;"></div>';
+
+                    monitors.forEach(function (m) {
+                        html += '<div style="display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0;">';
+                        html += '<span>' + m.monitorName + '</span>';
+                        html += '<span style="color: #94a3b8;">' + m.count + '</span>';
+                        html += '</div>';
+                    });
+
+                    html += '</div>';
+                    return html;
+                }
             }
         });
         statusCodeChart.render();

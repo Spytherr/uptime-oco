@@ -23,6 +23,13 @@ public class StatusCodeCount
 {
     public int StatusCode { get; set; }
     public int Count { get; set; }
+    public List<StatusCodeMonitorCount> Monitors { get; set; } = [];
+}
+
+public class StatusCodeMonitorCount
+{
+    public string MonitorName { get; set; } = string.Empty;
+    public int Count { get; set; }
 }
 
 public class MonitorStatusDto
@@ -35,4 +42,5 @@ public class MonitorStatusDto
     public DateTime? LastCheckAt { get; set; }
     public int? LastResponseTimeMs { get; set; }
     public int ConsecutiveFailures { get; set; }
+    public double UptimePercent { get; set; }
 }
