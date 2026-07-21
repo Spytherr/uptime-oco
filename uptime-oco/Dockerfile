@@ -1,30 +1,26 @@
-# Zobacz https://aka.ms/customizecontainer, aby dowiedzieć się, jak dostosować kontener debugowania i jak program Visual Studio używa tego pliku Dockerfile do kompilowania obrazów w celu szybszego debugowania.
+# 1) CSS (Tailwind) — requires Node
+FROM node:22-alpine AS css
+WORKDIR /src
+COPY uptime-oco/package.json uptime-oco/package-lock.json* ./
+RUN npm install
+COPY uptime-oco/ ./
+RUN npm run css:build
 
-# Ten etap jest używany podczas uruchamiania z programu VS w trybie szybkim (domyślnie dla konfiguracji debugowania)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-
-
-# Ten etap służy do kompilowania projektu usługi
+# 2) Build .NET
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["uptime-oco/uptime-oco.csproj", "uptime-oco/"]
-RUN dotnet restore "./uptime-oco/uptime-oco.csproj"
+RUN dotnet restore "uptime-oco/uptime-oco.csproj"
 COPY . .
-WORKDIR "/src/uptime-oco"
-RUN dotnet build "./uptime-oco.csproj" -c $BUILD_CONFIGURATION -o /app/build
+COPY --from=css /src/wwwroot/css/site.css uptime-oco/wwwroot/css/site.css
+RUN dotnet publish "uptime-oco/uptime-oco.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Ten etap służy do publikowania projektu usługi do skopiowania do etapu końcowego
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./uptime-oco.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-# Ten etap jest używany w środowisku produkcyjnym lub w przypadku uruchamiania z programu VS w trybie regularnym (domyślnie, gdy nie jest używana konfiguracja debugowania)
-FROM base AS final
+# 3) Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ConnectionStrings__UptimeOcoContext="Data Source=/app/data/uptime-oco.db"
+COPY --from=build /app/publish .
+VOLUME /app/data
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "uptime-oco.dll"]
