@@ -8,6 +8,9 @@ public static class DataExtensions
     public const string AdminEmail = "admin@uptime-oco.local";
     public const string AdminPassword = "Admin123!";
 
+    public const string AdminEmail2 = "admin2@uptime-oco.local";
+    public const string AdminPassword2 = "Admin123!";
+
     public static void AddUptimeOcoDatabase(this WebApplicationBuilder builder, string? connectionString)
     {
         builder.Services.AddDbContext<UptimeOcoContext>(options =>
@@ -29,34 +32,22 @@ public static class DataExtensions
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
+        if (!await roleManager.RoleExistsAsync("Admin"))
+        {
+            var roleResult = await roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Failed to create seed admin role: {errors}");
+            }
+        }
+
+        var admin = await EnsureAdminUserAsync(userManager, AdminEmail, AdminPassword);
+        var admin2 = await EnsureAdminUserAsync(userManager, AdminEmail2, AdminPassword2);
+
         if (await context.Monitors.AnyAsync())
         {
             return;
-        }
-
-        if (!await roleManager.RoleExistsAsync("Admin"))
-        {
-            await roleManager.CreateAsync(new IdentityRole("Admin"));
-        }
-
-        var admin = await userManager.FindByEmailAsync(AdminEmail);
-        if (admin is null)
-        {
-            admin = new ApplicationUser
-            {
-                UserName = AdminEmail,
-                Email = AdminEmail,
-                EmailConfirmed = true
-            };
-
-            var createResult = await userManager.CreateAsync(admin, AdminPassword);
-            if (!createResult.Succeeded)
-            {
-                var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Failed to create seed admin user: {errors}");
-            }
-
-            await userManager.AddToRoleAsync(admin, "Admin");
         }
 
         var now = DateTime.UtcNow;
@@ -68,7 +59,8 @@ public static class DataExtensions
             new() { Name = "GitHub", Url = "https://github.com", IntervalSeconds = 60, UserId = admin.Id },
             new() { Name = "JSONPlaceholder API", Url = "https://jsonplaceholder.typicode.com/posts/1", IntervalSeconds = 120, UserId = admin.Id },
             new() { Name = "HttpStat 200 OK", Url = "https://httpstat.us/200", IntervalSeconds = 60, UserId = admin.Id },
-            new() { Name = "HttpStat 500 Error", Url = "https://httpstat.us/500", IntervalSeconds = 60, UserId = admin.Id }
+            new() { Name = "HttpStat 500 Error", Url = "https://httpstat.us/500", IntervalSeconds = 60, UserId = admin.Id },
+            new() { Name = "Twitch", Url = "https://www.twitch.tv", IntervalSeconds = 60, UserId = admin2.Id }
         };
 
         context.Monitors.AddRange(monitors);
@@ -127,5 +119,41 @@ public static class DataExtensions
         });
 
         await context.SaveChangesAsync();
+    }
+
+    private static async Task<ApplicationUser> EnsureAdminUserAsync(
+        UserManager<ApplicationUser> userManager,
+        string email,
+        string password)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
+
+            var createResult = await userManager.CreateAsync(user, password);
+            if (!createResult.Succeeded)
+            {
+                var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Failed to create seed admin user: {errors}");
+            }
+        }
+
+        if (!await userManager.IsInRoleAsync(user, "Admin"))
+        {
+            var roleResult = await userManager.AddToRoleAsync(user, "Admin");
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Failed to assign seed admin role: {errors}");
+            }
+        }
+
+        return user;
     }
 }

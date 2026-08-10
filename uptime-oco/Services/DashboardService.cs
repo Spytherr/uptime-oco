@@ -4,10 +4,11 @@ namespace uptime_oco;
 
 public class DashboardService(UptimeOcoContext context) : IDashboardService
 {
-    public async Task<ServiceResult<DashboardViewModel>> GetDashboardDataAsync()
+    public async Task<ServiceResult<DashboardViewModel>> GetDashboardDataAsync(string userId)
     {
         var monitors = await context.Monitors
             .AsNoTracking()
+            .Where(m => m.UserId == userId)
             .ToListAsync();
 
         if (monitors.Count == 0)

@@ -1,16 +1,23 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace uptime_oco;
 
 [Authorize]
-public class DashboardController(IDashboardService dashboardService) : Controller
+public class DashboardController(
+    IDashboardService dashboardService,
+    UserManager<ApplicationUser> userManager) : Controller
 {
-    [OutputCache(Duration = 10)]
     public async Task<IActionResult> Index()
     {
-        var result = await dashboardService.GetDashboardDataAsync();
+        var userId = userManager.GetUserId(User);
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var result = await dashboardService.GetDashboardDataAsync(userId);
         if (!result.IsSuccess)
         {
             return View(new DashboardViewModel());

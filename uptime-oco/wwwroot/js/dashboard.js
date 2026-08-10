@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     monitors.forEach(function (m) {
                         html += '<div style="display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0;">';
-                        html += '<span>' + m.monitorName + '</span>';
+                        html += '<span>' + escapeHtml(m.monitorName) + '</span>';
                         html += '<span style="color: #94a3b8;">' + m.count + '</span>';
                         html += '</div>';
                     });

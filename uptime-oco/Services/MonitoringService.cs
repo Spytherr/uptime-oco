@@ -35,7 +35,10 @@ public class MonitoringService(
         try
         {
             var client = CreateClient();
-            var response = await client.GetAsync(monitor.Url, cancellationToken);
+            using var response = await client.GetAsync(
+                monitor.Url,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
             sw.Stop();
 
             ping = new PingResult
@@ -100,7 +103,7 @@ public class MonitoringService(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        await hubContext.Clients.All.SendAsync("PingReceived", new
+        await hubContext.Clients.User(monitor.UserId).SendAsync("PingReceived", new
         {
             monitorId = monitor.Id,
             monitorName = monitor.Name,
@@ -115,7 +118,7 @@ public class MonitoringService(
         {
             await notificationService.NotifyIncidentAsync(incident, monitor, cancellationToken);
 
-            await hubContext.Clients.All.SendAsync("IncidentUpdate", new
+            await hubContext.Clients.User(monitor.UserId).SendAsync("IncidentUpdate", new
             {
                 monitorId = monitor.Id,
                 monitorName = monitor.Name,

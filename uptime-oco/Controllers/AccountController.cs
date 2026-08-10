@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace uptime_oco;
 
@@ -20,6 +21,7 @@ public class AccountController(
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -38,11 +40,15 @@ public class AccountController(
             model.Email,
             model.Password,
             model.RememberMe,
-            lockoutOnFailure: false);
+            lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
-            return Redirect(returnUrl ?? Url.Action("Index", "Dashboard") ?? "/");
+            var destination = returnUrl is not null && Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : Url.Action("Index", "Dashboard") ?? "/";
+
+            return Redirect(destination);
         }
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
