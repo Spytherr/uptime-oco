@@ -16,63 +16,63 @@
         <div class="flex items-center gap-4">
             <h1 class="text-2xl font-bold">@Model.Name</h1>
             <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full @dotColor"></span>
+                <span class="w-2.5 h-2.5 @dotColor"></span>
                 <span class="text-sm font-medium @statusColor">@statusLabel</span>
             </div>
         </div>
         <div class="flex items-center gap-2">
             <form asp-action="ToggleActive" asp-route-id="@Model.Id" asp-route-returnUrl="@Url.Action("Details", "Monitors", new { id = Model.Id })" method="post" class="inline">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="class= px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                <button type="submit" class="px-4 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors text-sm">
                     @(Model.IsActive ? "Pause" : "Resume")
                 </button>
             </form>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="px-4 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
                 Edit
             </a>
-            <a asp-action="Delete" asp-route-id="@Model.Id" class="px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-down no-underline text-sm">
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="px-4 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-down transition-colors no-underline text-sm">
                 Delete
             </a>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">URL</p>
             <p class="font-medium mt-1 break-all">@Model.Url</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Interval</p>
             <p class="font-medium mt-1">@Model.IntervalSeconds seconds</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Expected Status</p>
             <p class="font-medium mt-1">HTTP @Model.ExpectedStatusCode</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Timeout</p>
             <p class="font-medium mt-1">@Model.TimeoutSeconds seconds</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Retry Threshold</p>
             <p class="font-medium mt-1">@Model.RetryThreshold failures</p>
         </div>
     </div>
 
     <div class="grid grid-cols-3 gap-4">
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Consecutive Failures</p>
             <p class="text-2xl font-bold mt-1 @(Model.ConsecutiveFailures > 0 ? "text-oco-down" : "text-oco-up")">
                 @Model.ConsecutiveFailures
             </p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Status</p>
             <p class="text-2xl font-bold mt-1 @(Model.IsActive ? "text-oco-up" : "text-oco-muted")">
                 @(Model.IsActive ? "Active" : "Paused")
             </p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Uptime (last 50 pings)</p>
             <p class="text-2xl font-bold mt-1 @uptimeColor">
                 @uptimePercent%
@@ -80,14 +80,14 @@
         </div>
     </div>
 
-    <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+    <div class="bg-oco-surface p-5 border-2 border-oco-border">
         <h2 class="text-lg font-semibold mb-4">Recent Ping Results</h2>
         @if (Model.PingResults.Count > 0)
         {
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="text-oco-muted text-left border-b border-oco-border">
+                        <tr class="text-oco-muted text-left border-b-2 border-oco-border">
                             <th class="pb-2 pr-4">Time</th>
                             <th class="pb-2 pr-4">Status</th>
                             <th class="pb-2 pr-4">HTTP Code</th>
@@ -98,7 +98,7 @@
                     <tbody>
                         @foreach (var ping in Model.PingResults)
                         {
-                            <tr class="border-b border-oco-border/50">
+                            <tr class="border-b border-oco-border">
                                 <td class="py-2 pr-4 text-oco-muted">@ping.CheckedAt.ToLocalTime().ToString("MMM dd, HH:mm:ss")</td>
                                 <td class="py-2 pr-4">
                                     @if (ping.IsSuccess)
@@ -125,14 +125,14 @@
         }
     </div>
 
-    <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+    <div class="bg-oco-surface p-5 border-2 border-oco-border">
         <h2 class="text-lg font-semibold mb-4">Recent Incidents</h2>
         @if (Model.Incidents.Count > 0)
         {
             <div class="space-y-3">
                 @foreach (var incident in Model.Incidents)
                 {
-                    <div class="flex items-center justify-between p-3 bg-oco-surface-2 rounded-lg border border-oco-border">
+                    <div class="flex items-center justify-between p-3 bg-oco-surface-2 border-2 border-oco-border">
                         <div>
                             <p class="text-sm">@incident.Reason</p>
                             <p class="text-xs text-oco-muted mt-1">
@@ -149,11 +149,11 @@
                         </div>
                         @if (incident.ResolvedAt.HasValue)
                         {
-                            <span class="px-2 py-1 text-xs rounded bg-oco-up/10 text-oco-up">Resolved</span>
+                            <span class="px-2 py-1 text-xs border-2 border-oco-border bg-oco-up/10 text-oco-up">Resolved</span>
                         }
                         else
                         {
-                            <span class="px-2 py-1 text-xs rounded bg-oco-down/10 text-oco-down">Open</span>
+                            <span class="px-2 py-1 text-xs border-2 border-oco-border bg-oco-down/10 text-oco-down">Open</span>
                         }
                     </div>
                 }

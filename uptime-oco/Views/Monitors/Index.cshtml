@@ -7,15 +7,15 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Monitors</h1>
-        <a asp-action="Create" class="px-4 py-2 bg-oco-accent text-white rounded-lg hover:opacity-90 transition-opacity no-underline text-sm font-medium">
+        <a asp-action="Create" class="px-4 py-2 border-2 border-oco-border bg-oco-accent text-oco-text hover:opacity-90 transition-opacity no-underline text-sm font-medium">
             + New Monitor
         </a>
     </div>
 
     <form method="get" class="flex gap-3">
         <input type="text" name="search" value="@search" placeholder="Search by name or URL..."
-               class="flex-1 px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-text placeholder-oco-muted focus:outline-none focus:border-oco-accent" />
-        <button type="submit" class="px-4 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text transition-colors">
+               class="flex-1 px-4 py-2 bg-oco-surface border-2 border-oco-border text-oco-text placeholder-oco-muted focus:outline-2 focus:outline-offset-2 focus:outline-oco-text" />
+        <button type="submit" class="px-4 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors">
             Search
         </button>
     </form>
@@ -33,7 +33,7 @@
             @if (Model.HasPreviousPage)
             {
                 <a asp-action="Index" asp-route-search="@search" asp-route-page="@(Model.PageIndex - 1)"
-                   class="px-3 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                   class="px-3 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
                     Prev
                 </a>
             }
@@ -45,7 +45,7 @@
             @if (Model.HasNextPage)
             {
                 <a asp-action="Index" asp-route-search="@search" asp-route-page="@(Model.PageIndex + 1)"
-                   class="px-3 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                   class="px-3 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
                     Next
                 </a>
             }

@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         reset: false,
                         download: false
                     },
-                    color: '#94a3b8',
-                    background: '#1e293b'
+                    color: '#929292',
+                    background: '#202020'
                 },
                 zoom: {
                     enabled: true,
@@ -161,17 +161,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     hideOverlappingLabels: true,
                     rotate: 0,
                     trim: true,
-                    style: { colors: '#94a3b8' }
+                    style: { colors: '#929292' }
                 },
                 axisBorder: { show: false }
             },
             yaxis: {
-                labels: { style: { colors: '#94a3b8' } }
+                labels: { style: { colors: '#929292' } }
             },
             stroke: {
-                curve: 'smooth',
-                width: 2,
-                colors: ['#6366f1'],
+                curve: 'straight',
+                width: 3,
+                colors: ['#c9c9c9'],
                 connectNullData: false
             },
             markers: {
@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 hover: { size: 5 }
             },
             grid: {
-                borderColor: '#334155',
-                strokeDashArray: 3
+                borderColor: '#4a4a4a',
+                strokeDashArray: 0
             },
             tooltip: {
                 theme: 'dark',
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 custom: function (opts) {
                     var point = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex];
                     var monitor = point && point.monitorName
-                        ? '<div style="color: #94a3b8; font-size: 12px;">' + escapeHtml(point.monitorName) + '</div>'
+                        ? '<div style="color: #929292; font-size: 12px;">' + escapeHtml(point.monitorName) + '</div>'
                         : '';
                     var value = point ? point.y : '';
                     return '<div style="padding: 8px 10px;">' + monitor + '<strong>' + value + ' ms</strong></div>';
@@ -226,10 +226,10 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             series: data.statusCodes.map(function (d) { return d.count; }),
             labels: data.statusCodes.map(function (d) { return d.statusCode.toString(); }),
-            colors: ['#22c55e', '#ef4444', '#f59e0b', '#6366f1', '#94a3b8'],
+            colors: ['#22c55e', '#ef4444', '#f59e0b', '#94a3b8', '#64748b'],
             legend: {
                 position: 'bottom',
-                labels: { colors: '#94a3b8' }
+                labels: { colors: '#929292' }
             },
             tooltip: {
                 theme: 'dark',
@@ -241,14 +241,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     var html = '<div style="padding: 10px; min-width: 200px;">';
                     html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">';
                     html += '<b style="font-size: 14px;">HTTP ' + sc.statusCode + '</b>';
-                    html += '<span style="color: #94a3b8; font-size: 13px;">' + sc.count + ' total</span>';
+                    html += '<span style="color: #929292; font-size: 13px;">' + sc.count + ' total</span>';
                     html += '</div>';
-                    html += '<div style="border-top: 1px solid #334155; margin-bottom: 6px;"></div>';
+                    html += '<div style="border-top: 2px solid #4a4a4a; margin-bottom: 6px;"></div>';
 
                     monitors.forEach(function (m) {
                         html += '<div style="display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0;">';
                         html += '<span>' + escapeHtml(m.monitorName) + '</span>';
-                        html += '<span style="color: #94a3b8;">' + m.count + '</span>';
+                        html += '<span style="color: #929292;">' + m.count + '</span>';
                         html += '</div>';
                     });
 
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var icon = type === 'down' ? '\uD83D\uDD34' : '\u2705';
 
         var toast = document.createElement('div');
-        toast.className = bgColor + ' text-white rounded-lg px-4 py-3 shadow-lg max-w-sm transition-all duration-300 opacity-0 translate-y-2';
+        toast.className = bgColor + ' text-white border-2 border-oco-border px-4 py-3 max-w-sm transition-all duration-300 opacity-0 translate-y-2';
         toast.innerHTML = '<div class="flex items-start gap-3">' +
             '<span class="text-lg">' + icon + '</span>' +
             '<div><p class="font-medium text-sm">' + escapeHtml(title) + '</p>' +
@@ -298,15 +298,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            var badge = card.querySelector('[data-status-badge]');
             var dot = card.querySelector('[data-status-dot]');
             var label = card.querySelector('[data-status-label]');
-            if (dot && label) {
+            if (badge && dot && label) {
+                var animationClasses = dot.className.split(' ').filter(function (c) { return c.startsWith('animate-'); }).join(' ');
                 if (payload.isSuccess) {
-                    dot.className = 'w-2.5 h-2.5 rounded-full bg-oco-up ' + dot.className.split(' ').filter(function (c) { return c.startsWith('animate-'); }).join(' ');
+                    badge.className = 'inline-flex items-center gap-2 px-3 py-1 border-2 border-oco-border text-sm font-medium bg-oco-up/10 text-oco-up';
+                    dot.className = 'w-2 h-2 bg-oco-up ' + animationClasses;
                     label.className = 'text-sm font-medium text-oco-up';
                     label.textContent = 'UP';
                 } else {
-                    dot.className = 'w-2.5 h-2.5 rounded-full bg-oco-down ' + dot.className.split(' ').filter(function (c) { return c.startsWith('animate-'); }).join(' ');
+                    badge.className = 'inline-flex items-center gap-2 px-3 py-1 border-2 border-oco-border text-sm font-medium bg-oco-down/10 text-oco-down';
+                    dot.className = 'w-2 h-2 bg-oco-down ' + animationClasses;
                     label.className = 'text-sm font-medium text-oco-down';
                     label.textContent = 'DOWN';
                 }

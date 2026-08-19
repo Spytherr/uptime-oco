@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="utf-8" />
@@ -8,40 +8,40 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
 </head>
-<body class="h-full bg-oco-bg text-oco-text">
+<body class="h-full bg-oco-bg text-oco-text font-mono">
     <div class="flex h-full">
-        <aside class="w-64 bg-oco-surface border-r border-oco-border flex flex-col shrink-0">
-            <div class="p-5 border-b border-oco-border">
-                <a asp-controller="Dashboard" asp-action="Index" class="text-xl font-bold text-oco-text no-underline">
+        <aside class="w-64 bg-oco-surface border-r-2 border-oco-border flex flex-col shrink-0">
+            <div class="p-5 border-b-2 border-oco-border">
+                <a asp-controller="Dashboard" asp-action="Index" class="text-xl font-bold tracking-[0.18em] uppercase text-oco-text no-underline">
                     uptime-oco
                 </a>
             </div>
             <nav class="flex-1 p-4 space-y-1">
                 <a asp-controller="Dashboard" asp-action="Index"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-oco-muted hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
+                   class="flex items-center gap-3 px-4 py-2.5 border-2 border-transparent text-oco-muted hover:border-oco-border hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
                     <span>Dashboard</span>
                 </a>
                 <a asp-controller="Monitors" asp-action="Index"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-oco-muted hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
+                   class="flex items-center gap-3 px-4 py-2.5 border-2 border-transparent text-oco-muted hover:border-oco-border hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
                     <span>Monitors</span>
                 </a>
                 <a asp-controller="Incidents" asp-action="Index"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-oco-muted hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
+                   class="flex items-center gap-3 px-4 py-2.5 border-2 border-transparent text-oco-muted hover:border-oco-border hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
                     <span>Incidents</span>
                 </a>
                 <a asp-controller="Notifications" asp-action="Index"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-oco-muted hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
+                   class="flex items-center gap-3 px-4 py-2.5 border-2 border-transparent text-oco-muted hover:border-oco-border hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
                     <span>Notifications</span>
                 </a>
             </nav>
-            <div class="p-4 border-t border-oco-border space-y-1">
+            <div class="p-4 border-t-2 border-oco-border space-y-1">
                 <a asp-controller="Account" asp-action="ChangePassword"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-oco-muted hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
+                   class="flex items-center gap-3 px-4 py-2.5 border-2 border-transparent text-oco-muted hover:border-oco-border hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
                     <span>Account</span>
                 </a>
                 <form asp-controller="Account" asp-action="Logout" method="post">
                     <button type="submit"
-                            class="w-full px-4 py-2.5 rounded-lg text-oco-muted hover:bg-oco-surface-2 hover:text-oco-down transition-colors text-left">
+                            class="w-full px-4 py-2.5 border-2 border-transparent text-oco-muted hover:border-oco-border hover:bg-oco-surface-2 hover:text-oco-down transition-colors text-left">
                         Logout
                     </button>
                 </form>

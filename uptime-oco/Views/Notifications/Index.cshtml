@@ -7,14 +7,14 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Notification Channels</h1>
-        <a asp-action="Create" class="px-4 py-2 bg-oco-accent text-white rounded-lg hover:opacity-90 transition-opacity no-underline text-sm font-medium">
+        <a asp-action="Create" class="px-4 py-2 border-2 border-oco-border bg-oco-accent text-oco-text hover:bg-oco-surface hover:text-oco-text transition-colors no-underline text-sm font-medium">
             + New Channel
         </a>
     </div>
 
     @if (!string.IsNullOrEmpty(testResult))
     {
-        <div class="px-4 py-3 rounded-lg border @(testResult.Contains("successfully") ? "bg-oco-up/10 border-oco-up/30 text-oco-up" : "bg-oco-down/10 border-oco-down/30 text-oco-down")">
+        <div class="px-4 py-3 border-2 border-oco-border @(testResult.Contains("successfully") ? "bg-oco-up/10 text-oco-up" : "bg-oco-down/10 text-oco-down")">
             @testResult
         </div>
     }
@@ -23,11 +23,13 @@
         @foreach (var channel in Model)
         {
             var typeLabel = channel.Type == NotificationType.Discord ? "Discord" : "Webhook";
-            var typeColor = channel.Type == NotificationType.Discord ? "bg-indigo-500/10 text-indigo-400" : "bg-blue-500/10 text-blue-400";
+            var typeColor = channel.Type == NotificationType.Discord
+                ? "border-2 border-oco-border bg-indigo-500/10 text-indigo-400"
+                : "border-2 border-oco-border bg-blue-500/10 text-blue-400";
 
-            <div class="flex items-center justify-between p-4 bg-oco-surface rounded-xl border border-oco-border">
+            <div class="flex items-center justify-between p-4 bg-oco-surface border-2 border-oco-border">
                 <div class="flex items-center gap-4">
-                    <span class="px-2 py-1 text-xs rounded @typeColor font-medium">@typeLabel</span>
+                    <span class="px-2 py-1 text-xs @typeColor font-medium">@typeLabel</span>
                     <div>
                         <p class="font-medium">@channel.Name</p>
                         <p class="text-sm text-oco-muted truncate max-w-md">@channel.Target</p>
@@ -36,23 +38,23 @@
                 <div class="flex items-center gap-4">
                     @if (channel.IsEnabled)
                     {
-                        <span class="px-2 py-1 text-xs rounded bg-oco-up/10 text-oco-up">Enabled</span>
+                        <span class="px-2 py-1 text-xs border-2 border-oco-border bg-oco-up/10 text-oco-up">Enabled</span>
                     }
                     else
                     {
-                        <span class="px-2 py-1 text-xs rounded bg-oco-muted/10 text-oco-muted">Disabled</span>
+                        <span class="px-2 py-1 text-xs border-2 border-oco-border bg-oco-muted/10 text-oco-muted">Disabled</span>
                     }
                     <div class="flex items-center gap-1">
                         <form asp-action="Test" asp-route-id="@channel.Id" method="post" class="inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="px-3 py-1.5 text-sm text-oco-muted hover:text-oco-accent">
+                            <button type="submit" class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-accent transition-colors">
                                 Test
                             </button>
                         </form>
                         <a asp-action="Edit" asp-route-id="@channel.Id"
-                           class="px-3 py-1.5 text-sm text-oco-muted hover:text-oco-text no-underline">Edit</a>
+                           class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">Edit</a>
                         <a asp-action="Delete" asp-route-id="@channel.Id"
-                           class="px-3 py-1.5 text-sm text-oco-muted hover:text-oco-down no-underline">Delete</a>
+                           class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-down transition-colors no-underline">Delete</a>
                     </div>
                 </div>
             </div>

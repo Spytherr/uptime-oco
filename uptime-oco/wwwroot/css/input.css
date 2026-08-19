@@ -4,14 +4,36 @@
 @source "../js";
 
 @theme {
-    --color-oco-bg: #0f172a;
-    --color-oco-surface: #1e293b;
-    --color-oco-surface-2: #172033;
-    --color-oco-border: #334155;
-    --color-oco-text: #e2e8f0;
-    --color-oco-muted: #94a3b8;
+    --font-sans: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --color-oco-bg: #171717;
+    --color-oco-surface: #202020;
+    --color-oco-surface-2: #292929;
+    --color-oco-border: #4a4a4a;
+    --color-oco-text: #c9c9c9;
+    --color-oco-muted: #929292;
     --color-oco-up: #22c55e;
     --color-oco-down: #ef4444;
     --color-oco-warn: #f59e0b;
-    --color-oco-accent: #6366f1;
+    --color-oco-accent: #464646;
+}
+
+@layer base {
+    ::selection {
+        color: var(--color-oco-surface);
+        background-color: var(--color-oco-text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        border-radius: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
 }

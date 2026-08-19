@@ -3,23 +3,25 @@
     ViewData["Title"] = "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="max-w-2xl border-2 border-oco-border bg-oco-surface p-6 space-y-4">
+    <h1 class="text-2xl font-bold">Error.</h1>
+    <h2 class="text-sm text-oco-muted">An error occurred while processing your request.</h2>
 
 @if (Model.ShowRequestId)
 {
     <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        <strong>Request ID:</strong> <code class="border-2 border-oco-border bg-oco-surface-2 px-2 py-1">@Model.RequestId</code>
     </p>
 }
 
-<h3>Development Mode</h3>
-<p>
+<h3 class="font-bold">Development Mode</h3>
+<p class="text-oco-muted">
     Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
 </p>
-<p>
+<p class="text-oco-muted">
     <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
     It can result in displaying sensitive information from exceptions to end users.
     For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
     and restarting the app.
 </p>
+</div>

@@ -18,55 +18,55 @@
     <h1 class="text-2xl font-bold">Dashboard</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Total Monitors</p>
             <p class="text-3xl font-bold mt-1">@Model.TotalMonitors</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Monitors Up</p>
             <p class="text-3xl font-bold mt-1 text-oco-up">@Model.MonitorsUp</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Monitors Down</p>
             <p class="text-3xl font-bold mt-1 text-oco-down">@Model.MonitorsDown</p>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Overall Uptime</p>
             <p class="text-3xl font-bold mt-1">@Model.OverallUptimePercent%</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="lg:col-span-2 bg-oco-surface p-5 border-2 border-oco-border">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 class="text-lg font-semibold">Response Time (ms)</h2>
                 <div class="flex items-center gap-2">
-                    <select id="responseTimeMonitorSelect" class="px-3 py-1.5 text-sm bg-oco-surface-2 border border-oco-border rounded-lg text-oco-muted focus:outline-none focus:border-oco-accent">
+                    <select id="responseTimeMonitorSelect" class="px-3 py-1.5 text-sm bg-oco-surface-2 border-2 border-oco-border text-oco-text focus:outline-2 focus:outline-offset-2 focus:outline-oco-text">
                         <option value="">All monitors</option>
                         @foreach (var monitor in Model.MonitorStatuses.OrderBy(m => m.Name))
                         {
                             <option value="@monitor.Id">@monitor.Name</option>
                         }
                     </select>
-                    <button id="resetZoomBtn" class="px-3 py-1.5 text-sm bg-oco-surface-2 border border-oco-border rounded-lg text-oco-muted hover:text-oco-text transition-colors">
+                    <button id="resetZoomBtn" class="px-3 py-1.5 text-sm bg-oco-surface-2 border-2 border-oco-border text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors">
                         Reset Zoom
                     </button>
                 </div>
             </div>
             <div id="responseTimeChart"></div>
         </div>
-        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <h2 class="text-lg font-semibold mb-4">Status Codes</h2>
             <div id="statusCodeChart"></div>
         </div>
     </div>
 
-    <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+    <div class="bg-oco-surface p-5 border-2 border-oco-border">
         <h2 class="text-lg font-semibold mb-4">Monitors</h2>
         <div class="space-y-3">
             @foreach (var monitor in Model.MonitorStatuses)
             {
-                <div class="flex items-center justify-between p-4 bg-oco-surface-2 rounded-lg border border-oco-border transition-all duration-300" data-monitor-id="@monitor.Id">
+                <div class="flex items-center justify-between p-4 bg-oco-surface-2 border-2 border-oco-border transition-all duration-300" data-monitor-id="@monitor.Id">
                     <div class="flex items-center gap-4">
                         <partial name="_StatusBadge" model="monitor" />
                         <div>

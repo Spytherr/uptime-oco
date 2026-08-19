@@ -9,15 +9,15 @@
 
     <div class="flex gap-2">
         <a asp-action="Index" asp-route-filter=""
-           class="px-4 py-2 rounded-lg text-sm no-underline @(string.IsNullOrEmpty(filter) ? "bg-oco-accent text-white" : "bg-oco-surface border border-oco-border text-oco-muted hover:text-oco-text")">
+           class="px-4 py-2 border-2 border-oco-border text-sm no-underline @(string.IsNullOrEmpty(filter) ? "bg-oco-accent text-oco-text" : "bg-oco-surface text-oco-muted hover:text-oco-text")">
             All
         </a>
         <a asp-action="Index" asp-route-filter="open"
-           class="px-4 py-2 rounded-lg text-sm no-underline @(filter == "open" ? "bg-oco-down text-white" : "bg-oco-surface border border-oco-border text-oco-muted hover:text-oco-text")">
+           class="px-4 py-2 border-2 border-oco-border text-sm no-underline @(filter == "open" ? "bg-oco-down text-white" : "bg-oco-surface text-oco-muted hover:text-oco-text")">
             Open
         </a>
         <a asp-action="Index" asp-route-filter="resolved"
-           class="px-4 py-2 rounded-lg text-sm no-underline @(filter == "resolved" ? "bg-oco-up text-white" : "bg-oco-surface border border-oco-border text-oco-muted hover:text-oco-text")">
+           class="px-4 py-2 border-2 border-oco-border text-sm no-underline @(filter == "resolved" ? "bg-oco-up text-white" : "bg-oco-surface text-oco-muted hover:text-oco-text")">
             Resolved
         </a>
     </div>
@@ -26,17 +26,17 @@
         @foreach (var incident in Model.Items)
         {
             var isResolved = incident.ResolvedAt.HasValue;
-            var borderColor = isResolved ? "border-oco-up/30" : "border-oco-down/30";
-            var statusBg = isResolved ? "bg-oco-up/10" : "bg-oco-down/10";
-            var statusText = isResolved ? "text-oco-up" : "text-oco-down";
+            var statusClasses = isResolved
+                ? "border-2 border-oco-border bg-oco-up/10 text-oco-up"
+                : "border-2 border-oco-border bg-oco-down/10 text-oco-down";
             var statusLabel = isResolved ? "Resolved" : "Open";
             var duration = isResolved
                 ? (incident.ResolvedAt!.Value - incident.StartedAt)
                 : DateTime.UtcNow - incident.StartedAt;
 
-            <div class="flex items-center justify-between p-4 bg-oco-surface rounded-xl border @borderColor">
+            <div class="flex items-center justify-between p-4 bg-oco-surface border-2 @(isResolved ? "border-oco-up/30" : "border-oco-down/30")">
                 <div class="flex items-center gap-4">
-                    <span class="px-2 py-1 text-xs rounded @statusBg @statusText font-medium">@statusLabel</span>
+                    <span class="px-2 py-1 text-xs @statusClasses font-medium">@statusLabel</span>
                     <div>
                         <a asp-action="Details" asp-route-id="@incident.Id"
                            class="font-medium text-oco-text hover:text-oco-accent no-underline">
@@ -54,7 +54,7 @@
                     {
                         <form asp-action="Resolve" asp-route-id="@incident.Id" method="post" class="inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="px-3 py-1.5 text-sm bg-oco-up/10 text-oco-up rounded-lg hover:bg-oco-up/20 transition-colors">
+                            <button type="submit" class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-up/10 text-oco-up hover:bg-oco-up/20 transition-colors">
                                 Resolve
                             </button>
                         </form>
@@ -70,7 +70,7 @@
             @if (Model.HasPreviousPage)
             {
                 <a asp-action="Index" asp-route-filter="@filter" asp-route-page="@(Model.PageIndex - 1)"
-                   class="px-3 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                   class="px-3 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
                     Prev
                 </a>
             }
@@ -80,7 +80,7 @@
             @if (Model.HasNextPage)
             {
                 <a asp-action="Index" asp-route-filter="@filter" asp-route-page="@(Model.PageIndex + 1)"
-                   class="px-3 py-2 bg-oco-surface border border-oco-border rounded-lg text-oco-muted hover:text-oco-text no-underline text-sm">
+                   class="px-3 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
                     Next
                 </a>
             }
