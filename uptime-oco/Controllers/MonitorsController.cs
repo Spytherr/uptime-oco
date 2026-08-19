@@ -92,6 +92,8 @@ public class MonitorsController(
             Name = model.Name,
             Url = model.Url,
             IntervalSeconds = model.IntervalSeconds,
+            ExpectedStatusCode = model.ExpectedStatusCode,
+            TimeoutSeconds = model.TimeoutSeconds,
             RetryThreshold = model.RetryThreshold,
             UserId = userId
         };
@@ -121,6 +123,8 @@ public class MonitorsController(
             Name = monitor.Name,
             Url = monitor.Url,
             IntervalSeconds = monitor.IntervalSeconds,
+            ExpectedStatusCode = monitor.ExpectedStatusCode,
+            TimeoutSeconds = monitor.TimeoutSeconds,
             RetryThreshold = monitor.RetryThreshold,
             IsActive = monitor.IsActive
         };
@@ -154,6 +158,8 @@ public class MonitorsController(
         monitor.Name = model.Name;
         monitor.Url = model.Url;
         monitor.IntervalSeconds = model.IntervalSeconds;
+        monitor.ExpectedStatusCode = model.ExpectedStatusCode;
+        monitor.TimeoutSeconds = model.TimeoutSeconds;
         monitor.RetryThreshold = model.RetryThreshold;
         monitor.IsActive = model.IsActive;
 

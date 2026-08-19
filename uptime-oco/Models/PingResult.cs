@@ -14,5 +14,7 @@ public class PingResult
 
     public bool IsSuccess { get; set; }
 
+    public string? FailureReason { get; set; }
+
     public DateTime CheckedAt { get; set; } = DateTime.UtcNow;
 }

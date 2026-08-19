@@ -17,6 +17,12 @@ public class EditMonitorValidator : AbstractValidator<EditMonitorViewModel>
         RuleFor(x => x.IntervalSeconds)
             .InclusiveBetween(10, 3600).WithMessage("Interval must be between 10 and 3600 seconds.");
 
+        RuleFor(x => x.ExpectedStatusCode)
+            .InclusiveBetween(100, 599).WithMessage("Expected status code must be between 100 and 599.");
+
+        RuleFor(x => x.TimeoutSeconds)
+            .InclusiveBetween(1, 60).WithMessage("Timeout must be between 1 and 60 seconds.");
+
         RuleFor(x => x.RetryThreshold)
             .InclusiveBetween(1, 10).WithMessage("Retry threshold must be between 1 and 10.");
     }

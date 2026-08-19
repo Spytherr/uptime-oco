@@ -21,6 +21,8 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
         builder.Entity<Monitor>(entity =>
         {
             entity.Property(m => m.Name).HasMaxLength(200);
+            entity.Property(m => m.ExpectedStatusCode).HasDefaultValue(200);
+            entity.Property(m => m.TimeoutSeconds).HasDefaultValue(10);
             entity.Ignore(m => m.UptimePercent);
 
             entity.HasOne(m => m.User)
@@ -31,6 +33,7 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
 
         builder.Entity<PingResult>(entity =>
         {
+            entity.Property(p => p.FailureReason).HasMaxLength(500);
             entity.HasIndex(p => p.CheckedAt);
 
             entity.HasOne(p => p.Monitor)

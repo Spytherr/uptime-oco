@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
             <p class="text-oco-muted text-sm">URL</p>
             <p class="font-medium mt-1 break-all">@Model.Url</p>
@@ -44,6 +44,14 @@
         <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
             <p class="text-oco-muted text-sm">Interval</p>
             <p class="font-medium mt-1">@Model.IntervalSeconds seconds</p>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Expected Status</p>
+            <p class="font-medium mt-1">HTTP @Model.ExpectedStatusCode</p>
+        </div>
+        <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
+            <p class="text-oco-muted text-sm">Timeout</p>
+            <p class="font-medium mt-1">@Model.TimeoutSeconds seconds</p>
         </div>
         <div class="bg-oco-surface rounded-xl p-5 border border-oco-border">
             <p class="text-oco-muted text-sm">Retry Threshold</p>
@@ -83,6 +91,7 @@
                             <th class="pb-2 pr-4">Time</th>
                             <th class="pb-2 pr-4">Status</th>
                             <th class="pb-2 pr-4">HTTP Code</th>
+                            <th class="pb-2 pr-4">Failure Reason</th>
                             <th class="pb-2">Response Time</th>
                         </tr>
                     </thead>
@@ -102,6 +111,7 @@
                                     }
                                 </td>
                                 <td class="py-2 pr-4 text-oco-muted">@(ping.HttpStatusCode?.ToString() ?? "—")</td>
+                                <td class="py-2 pr-4 text-oco-muted">@(ping.FailureReason ?? "—")</td>
                                 <td class="py-2 text-oco-muted">@(ping.ResponseTimeMs.HasValue ? $"{ping.ResponseTimeMs} ms" : "—")</td>
                             </tr>
                         }

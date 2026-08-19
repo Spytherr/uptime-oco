@@ -12,10 +12,10 @@ public class MonitoringService(
     IHubContext<MonitorHub> hubContext,
     ILogger<MonitoringService> logger) : IMonitoringService
 {
-    private HttpClient CreateClient()
+    private HttpClient CreateClient(int timeoutSeconds)
     {
         var client = httpClientFactory.CreateClient("monitor");
-        client.Timeout = TimeSpan.FromSeconds(10);
+        client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
         client.DefaultRequestHeaders.UserAgent.ParseAdd("uptime-oco/1.0");
         return client;
     }
@@ -34,19 +34,25 @@ public class MonitoringService(
 
         try
         {
-            var client = CreateClient();
+            var client = CreateClient(monitor.TimeoutSeconds);
             using var response = await client.GetAsync(
                 monitor.Url,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken);
             sw.Stop();
 
+            var statusCode = (int)response.StatusCode;
+            var isSuccess = statusCode == monitor.ExpectedStatusCode;
+
             ping = new PingResult
             {
                 MonitorId = monitor.Id,
                 ResponseTimeMs = (int)sw.ElapsedMilliseconds,
-                HttpStatusCode = (int)response.StatusCode,
-                IsSuccess = response.IsSuccessStatusCode,
+                HttpStatusCode = statusCode,
+                IsSuccess = isSuccess,
+                FailureReason = isSuccess
+                    ? null
+                    : $"Expected HTTP {monitor.ExpectedStatusCode}, received HTTP {statusCode}",
                 CheckedAt = DateTime.UtcNow
             };
         }
@@ -59,6 +65,7 @@ public class MonitoringService(
                 ResponseTimeMs = (int)sw.ElapsedMilliseconds,
                 HttpStatusCode = null,
                 IsSuccess = false,
+                FailureReason = $"Request timed out after {monitor.TimeoutSeconds} seconds",
                 CheckedAt = DateTime.UtcNow
             };
         }
@@ -73,6 +80,7 @@ public class MonitoringService(
                 ResponseTimeMs = null,
                 HttpStatusCode = null,
                 IsSuccess = false,
+                FailureReason = "Connection failed",
                 CheckedAt = DateTime.UtcNow
             };
         }
@@ -174,9 +182,9 @@ public class MonitoringService(
 
             if (openIncident is null)
             {
-                var reason = ping.HttpStatusCode.HasValue
+                var reason = ping.FailureReason ?? (ping.HttpStatusCode.HasValue
                     ? $"HTTP {ping.HttpStatusCode.Value}"
-                    : "Connection failed";
+                    : "Connection failed");
 
                 openIncident = new Incident
                 {
