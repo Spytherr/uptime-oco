@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using uptime_oco;
 
@@ -10,9 +11,11 @@ using uptime_oco;
 namespace uptime_oco.Data.Migrations
 {
     [DbContext(typeof(UptimeOcoContext))]
-    partial class UptimeOcoContextModelSnapshot : ModelSnapshot
+    [Migration("20260820085339_AddPingHistoryIndex")]
+    partial class AddPingHistoryIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");

@@ -26,7 +26,7 @@
             <p>Retry: @Model.RetryThreshold</p>
             <p class="mt-1">
                 <span class="@(Model.UptimePercent >= 99 ? "text-oco-up" : Model.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down")">
-                    @Model.UptimePercent% uptime
+                    @Model.UptimePercent% uptime (24h)
                 </span>
             </p>
         </div>

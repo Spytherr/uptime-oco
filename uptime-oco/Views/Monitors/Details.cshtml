@@ -5,10 +5,7 @@
     var statusColor = isUp ? "text-oco-up" : "text-oco-down";
     var dotColor = isUp ? "bg-oco-up" : "bg-oco-down";
     var statusLabel = isUp ? "UP" : "DOWN";
-    var totalPings = Model.PingResults.Count;
-    var successPings = Model.PingResults.Count(p => p.IsSuccess);
-    var uptimePercent = totalPings > 0 ? Math.Round((double)successPings / totalPings * 100, 2) : 100;
-    var uptimeColor = uptimePercent >= 99 ? "text-oco-up" : uptimePercent >= 90 ? "text-oco-warn" : "text-oco-down";
+    var uptimeColor = Model.UptimePercent >= 99 ? "text-oco-up" : Model.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down";
 }
 
 <div class="space-y-6">
@@ -73,9 +70,9 @@
             </p>
         </div>
         <div class="bg-oco-surface p-5 border-2 border-oco-border">
-            <p class="text-oco-muted text-sm">Uptime (last 50 pings)</p>
+            <p class="text-oco-muted text-sm">Uptime (last 24 hours)</p>
             <p class="text-2xl font-bold mt-1 @uptimeColor">
-                @uptimePercent%
+                @Model.UptimePercent%
             </p>
         </div>
     </div>

@@ -31,7 +31,7 @@
             <p class="text-3xl font-bold mt-1 text-oco-down">@Model.MonitorsDown</p>
         </div>
         <div class="bg-oco-surface p-5 border-2 border-oco-border">
-            <p class="text-oco-muted text-sm">Overall Uptime</p>
+            <p class="text-oco-muted text-sm">Overall Uptime (last 24 hours)</p>
             <p class="text-3xl font-bold mt-1">@Model.OverallUptimePercent%</p>
         </div>
     </div>
@@ -39,7 +39,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-oco-surface p-5 border-2 border-oco-border">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 class="text-lg font-semibold">Response Time (ms)</h2>
+                <h2 class="text-lg font-semibold">Response Time (last 24 hours)</h2>
                 <div class="flex items-center gap-2">
                     <select id="responseTimeMonitorSelect" class="px-3 py-1.5 text-sm bg-oco-surface-2 border-2 border-oco-border text-oco-text focus:outline-2 focus:outline-offset-2 focus:outline-oco-text">
                         <option value="">All monitors</option>
@@ -56,7 +56,7 @@
             <div id="responseTimeChart"></div>
         </div>
         <div class="bg-oco-surface p-5 border-2 border-oco-border">
-            <h2 class="text-lg font-semibold mb-4">Status Codes</h2>
+            <h2 class="text-lg font-semibold mb-4">Status Codes (last 24 hours)</h2>
             <div id="statusCodeChart"></div>
         </div>
     </div>
@@ -89,7 +89,7 @@
                         <p data-response-time>@(monitor.LastResponseTimeMs.HasValue ? $"{monitor.LastResponseTimeMs} ms" : "")</p>
                         <p class="mt-1">
                             <span class="@(monitor.UptimePercent >= 99 ? "text-oco-up" : monitor.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down")">
-                                @monitor.UptimePercent% uptime
+                                @monitor.UptimePercent% uptime (24h)
                             </span>
                         </p>
                     </div>

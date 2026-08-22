@@ -29,9 +29,10 @@ public class MonitorsController(
         var paginated = await PaginatedList<Monitor>.CreateAsync(query, page, pageSize);
 
         var monitorIds = paginated.Items.Select(m => m.Id).ToList();
+        var cutoff = DateTime.UtcNow.AddHours(-24);
         var pingStats = await context.PingResults
             .AsNoTracking()
-            .Where(p => monitorIds.Contains(p.MonitorId))
+            .Where(p => monitorIds.Contains(p.MonitorId) && p.CheckedAt >= cutoff)
             .GroupBy(p => p.MonitorId)
             .Select(g => new { MonitorId = g.Key, Total = g.Count(), Success = g.Count(p => p.IsSuccess) })
             .ToListAsync();
@@ -61,6 +62,18 @@ public class MonitorsController(
         {
             return NotFound();
         }
+
+        var cutoff = DateTime.UtcNow.AddHours(-24);
+        var uptimeStats = await context.PingResults
+            .AsNoTracking()
+            .Where(p => p.MonitorId == monitor.Id && p.CheckedAt >= cutoff)
+            .GroupBy(_ => 1)
+            .Select(g => new { Total = g.Count(), Success = g.Count(p => p.IsSuccess) })
+            .FirstOrDefaultAsync();
+
+        monitor.UptimePercent = uptimeStats is not null && uptimeStats.Total > 0
+            ? Math.Round((double)uptimeStats.Success / uptimeStats.Total * 100, 2)
+            : 100;
 
         return View(monitor);
     }

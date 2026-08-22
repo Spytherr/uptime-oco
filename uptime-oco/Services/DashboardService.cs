@@ -17,12 +17,12 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
         }
 
         var monitorIds = monitors.Select(m => m.Id).ToList();
+        var cutoff = DateTime.UtcNow.AddHours(-24);
 
         var recentPings = await context.PingResults
             .AsNoTracking()
-            .Where(p => monitorIds.Contains(p.MonitorId))
+            .Where(p => monitorIds.Contains(p.MonitorId) && p.CheckedAt >= cutoff)
             .OrderByDescending(p => p.CheckedAt)
-            .Take(500)
             .ToListAsync();
 
         var openIncidents = await context.Incidents
@@ -31,12 +31,17 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
             .Select(i => i.MonitorId)
             .ToListAsync();
 
+        var pingsByMonitor = recentPings
+            .GroupBy(p => p.MonitorId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        var monitorNames = monitors.ToDictionary(m => m.Id, m => m.Name);
+
         var monitorStatuses = monitors.Select(m =>
         {
-            var lastPing = recentPings.FirstOrDefault(p => p.MonitorId == m.Id);
+            var monitorPings = pingsByMonitor.TryGetValue(m.Id, out var pings) ? pings : [];
+            var lastPing = monitorPings.FirstOrDefault();
             var hasOpenIncident = openIncidents.Contains(m.Id);
             var isUp = lastPing is not null && lastPing.IsSuccess && !hasOpenIncident;
-            var monitorPings = recentPings.Where(p => p.MonitorId == m.Id).ToList();
             var monitorTotal = monitorPings.Count;
             var monitorSuccess = monitorPings.Count(p => p.IsSuccess);
             var monitorUptime = monitorTotal > 0
@@ -78,7 +83,7 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
                 MonitorId = p.MonitorId,
                 CheckedAt = p.CheckedAt,
                 ResponseTimeMs = p.ResponseTimeMs!.Value,
-                MonitorName = monitors.First(m => m.Id == p.MonitorId).Name
+                MonitorName = monitorNames[p.MonitorId]
             })
             .ToList();
 
@@ -90,7 +95,7 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
                 StatusCode = g.Key,
                 Count = g.Count(),
                 Monitors = g
-                    .GroupBy(p => monitors.First(m => m.Id == p.MonitorId).Name)
+                    .GroupBy(p => monitorNames[p.MonitorId])
                     .Select(mg => new StatusCodeMonitorCount { MonitorName = mg.Key, Count = mg.Count() })
                     .OrderByDescending(mg => mg.Count)
                     .ToList()

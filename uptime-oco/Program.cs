@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
@@ -37,6 +38,9 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IMonitoringService, MonitoringService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<MonitorBackgroundService>();
+builder.Services.AddHostedService<DataRetentionService>();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<UptimeOcoContext>();
 builder.Services.AddHttpClient("monitor");
 builder.Services.AddHttpClient("notification");
 builder.Services.AddOutputCache();
@@ -90,6 +94,7 @@ app.MapControllerRoute(
         pattern: "{controller=Dashboard}/{action=Index}/{id?}")
     .WithStaticAssets();
 app.MapControllers();
+app.MapHealthChecks("/health").AllowAnonymous();
 app.MapHub<MonitorHub>("/hubs/monitor");
 
 app.Run();

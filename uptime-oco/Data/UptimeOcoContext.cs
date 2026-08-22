@@ -35,6 +35,7 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
         {
             entity.Property(p => p.FailureReason).HasMaxLength(500);
             entity.HasIndex(p => p.CheckedAt);
+            entity.HasIndex(p => new { p.MonitorId, p.CheckedAt });
 
             entity.HasOne(p => p.Monitor)
                 .WithMany(m => m.PingResults)
