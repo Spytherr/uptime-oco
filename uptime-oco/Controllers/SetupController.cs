@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 
 namespace uptime_oco;
 
@@ -12,9 +14,9 @@ public class SetupController(
     IValidator<SetupViewModel> validator) : Controller
 {
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        if (userManager.Users.Any())
+        if (await userManager.Users.AnyAsync(HttpContext.RequestAborted))
         {
             return RedirectToAction("Index", "Home");
         }
@@ -24,14 +26,15 @@ public class SetupController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("setup")]
     public async Task<IActionResult> Index(SetupViewModel model)
     {
-        if (userManager.Users.Any())
+        if (await userManager.Users.AnyAsync(HttpContext.RequestAborted))
         {
             return RedirectToAction("Index", "Home");
         }
 
-        var validationResult = await validator.ValidateAsync(model);
+        var validationResult = await validator.ValidateAsync(model, HttpContext.RequestAborted);
         if (!validationResult.IsValid)
         {
             foreach (var error in validationResult.Errors)

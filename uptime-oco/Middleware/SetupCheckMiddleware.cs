@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace uptime_oco;
 
@@ -30,7 +31,7 @@ public class SetupCheckMiddleware
             return;
         }
 
-        if (!userManager.Users.Any())
+        if (!await userManager.Users.AnyAsync(context.RequestAborted))
         {
             context.Response.Redirect("/Setup");
             return;
