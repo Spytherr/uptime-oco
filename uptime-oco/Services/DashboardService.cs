@@ -25,11 +25,12 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
             .OrderByDescending(p => p.CheckedAt)
             .ToListAsync();
 
-        var openIncidents = await context.Incidents
+        var openIncidentMonitorIds = (await context.Incidents
             .AsNoTracking()
             .Where(i => i.ResolvedAt == null && monitorIds.Contains(i.MonitorId))
             .Select(i => i.MonitorId)
-            .ToListAsync();
+            .ToListAsync())
+            .ToHashSet();
 
         var pingsByMonitor = recentPings
             .GroupBy(p => p.MonitorId)
@@ -40,8 +41,8 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
         {
             var monitorPings = pingsByMonitor.TryGetValue(m.Id, out var pings) ? pings : [];
             var lastPing = monitorPings.FirstOrDefault();
-            var hasOpenIncident = openIncidents.Contains(m.Id);
-            var isUp = lastPing is not null && lastPing.IsSuccess && !hasOpenIncident;
+            var hasOpenIncident = openIncidentMonitorIds.Contains(m.Id);
+            var status = MonitorStatusCalculator.Calculate(m, lastPing is not null, hasOpenIncident);
             var monitorTotal = monitorPings.Count;
             var monitorSuccess = monitorPings.Count(p => p.IsSuccess);
             var monitorUptime = monitorTotal > 0
@@ -54,7 +55,7 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
                 Name = m.Name,
                 Url = m.Url,
                 IntervalSeconds = m.IntervalSeconds,
-                IsUp = isUp,
+                Status = status,
                 IsActive = m.IsActive,
                 LastCheckAt = m.LastCheckAt,
                 LastResponseTimeMs = lastPing?.ResponseTimeMs,
@@ -62,12 +63,6 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
                 UptimePercent = monitorUptime
             };
         }).ToList();
-
-        var totalPings = recentPings.Count;
-        var successPings = recentPings.Count(p => p.IsSuccess);
-        var uptimePercent = totalPings > 0
-            ? Math.Round((double)successPings / totalPings * 100, 2)
-            : 100;
 
         var avgResponse = recentPings
             .Where(p => p.ResponseTimeMs.HasValue)
@@ -105,10 +100,10 @@ public class DashboardService(UptimeOcoContext context) : IDashboardService
 
         var vm = new DashboardViewModel
         {
-            TotalMonitors = monitors.Count,
-            MonitorsUp = monitorStatuses.Count(m => m.IsUp),
-            MonitorsDown = monitorStatuses.Count(m => !m.IsUp),
-            OverallUptimePercent = uptimePercent,
+            MonitorsUp = monitorStatuses.Count(m => m.Status == MonitorStatus.Up),
+            MonitorsDown = monitorStatuses.Count(m => m.Status == MonitorStatus.Down),
+            MonitorsPaused = monitorStatuses.Count(m => m.Status == MonitorStatus.Paused),
+            MonitorsUnknown = monitorStatuses.Count(m => m.Status == MonitorStatus.Unknown),
             AvgResponseTimeMs = Math.Round(avgResponse, 1),
             ResponseTimeSeries = responseTimeSeries,
             StatusCodeDistribution = statusCodeDist,

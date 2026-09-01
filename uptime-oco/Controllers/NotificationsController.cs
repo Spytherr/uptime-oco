@@ -175,15 +175,17 @@ public class NotificationsController(
 
         try
         {
-            if (channel.Type == NotificationType.Discord)
-            {
-                await client.PostAsJsonAsync(channel.Target, new { content = message });
-            }
-            else
-            {
-                await client.PostAsJsonAsync(channel.Target, new { text = message, title = "uptime-oco test" });
-            }
+            using var response = channel.Type == NotificationType.Discord
+                ? await client.PostAsJsonAsync(
+                    channel.Target,
+                    new { content = message },
+                    HttpContext.RequestAborted)
+                : await client.PostAsJsonAsync(
+                    channel.Target,
+                    new { text = message, title = "uptime-oco test" },
+                    HttpContext.RequestAborted);
 
+            response.EnsureSuccessStatusCode();
             TempData["TestResult"] = "Test notification sent successfully.";
         }
         catch (Exception)

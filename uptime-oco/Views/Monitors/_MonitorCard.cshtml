@@ -1,17 +1,8 @@
 @model Monitor
-@{
-    var isUp = Model.ConsecutiveFailures < Model.RetryThreshold;
-    var statusColor = isUp ? "text-oco-up" : "text-oco-down";
-    var dotColor = isUp ? "bg-oco-up" : "bg-oco-down";
-    var statusLabel = isUp ? "UP" : "DOWN";
-}
 
 <div class="flex items-center justify-between p-4 bg-oco-surface border-2 border-oco-border">
     <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 @dotColor"></span>
-            <span class="text-sm font-medium @statusColor">@statusLabel</span>
-        </div>
+        <partial name="_StatusBadge" model="Model.Status" />
         <div>
             <a asp-action="Details" asp-route-id="@Model.Id"
                class="font-medium text-oco-text hover:text-oco-accent no-underline">

@@ -36,6 +36,12 @@ public class MonitorsController(
             .GroupBy(p => p.MonitorId)
             .Select(g => new { MonitorId = g.Key, Total = g.Count(), Success = g.Count(p => p.IsSuccess) })
             .ToListAsync();
+        var openIncidentMonitorIds = (await context.Incidents
+            .AsNoTracking()
+            .Where(i => monitorIds.Contains(i.MonitorId) && i.ResolvedAt == null)
+            .Select(i => i.MonitorId)
+            .ToListAsync())
+            .ToHashSet();
 
         foreach (var monitor in paginated.Items)
         {
@@ -43,6 +49,10 @@ public class MonitorsController(
             monitor.UptimePercent = stats is not null && stats.Total > 0
                 ? Math.Round((double)stats.Success / stats.Total * 100, 2)
                 : 100;
+            monitor.Status = MonitorStatusCalculator.Calculate(
+                monitor,
+                monitor.LastCheckAt is not null,
+                openIncidentMonitorIds.Contains(monitor.Id));
         }
 
         ViewData["Search"] = search;
@@ -74,6 +84,10 @@ public class MonitorsController(
         monitor.UptimePercent = uptimeStats is not null && uptimeStats.Total > 0
             ? Math.Round((double)uptimeStats.Success / uptimeStats.Total * 100, 2)
             : 100;
+
+        var latestPing = monitor.PingResults.OrderByDescending(p => p.CheckedAt).FirstOrDefault();
+        var hasOpenIncident = monitor.Incidents.Any(i => i.ResolvedAt is null);
+        monitor.Status = MonitorStatusCalculator.Calculate(monitor, latestPing is not null, hasOpenIncident);
 
         return View(monitor);
     }

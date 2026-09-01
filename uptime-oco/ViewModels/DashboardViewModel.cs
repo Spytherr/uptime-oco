@@ -2,10 +2,10 @@
 
 public class DashboardViewModel
 {
-    public int TotalMonitors { get; set; }
     public int MonitorsUp { get; set; }
     public int MonitorsDown { get; set; }
-    public double OverallUptimePercent { get; set; }
+    public int MonitorsPaused { get; set; }
+    public int MonitorsUnknown { get; set; }
     public double AvgResponseTimeMs { get; set; }
     public List<ResponseTimePoint> ResponseTimeSeries { get; set; } = [];
     public List<StatusCodeCount> StatusCodeDistribution { get; set; } = [];
@@ -39,7 +39,7 @@ public class MonitorStatusDto
     public string Name { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public int IntervalSeconds { get; set; }
-    public bool IsUp { get; set; }
+    public MonitorStatus Status { get; set; } = MonitorStatus.Unknown;
     public bool IsActive { get; set; }
     public DateTime? LastCheckAt { get; set; }
     public int? LastResponseTimeMs { get; set; }

@@ -1,10 +1,6 @@
 @model Monitor
 @{
     ViewData["Title"] = Model.Name;
-    var isUp = Model.ConsecutiveFailures < Model.RetryThreshold;
-    var statusColor = isUp ? "text-oco-up" : "text-oco-down";
-    var dotColor = isUp ? "bg-oco-up" : "bg-oco-down";
-    var statusLabel = isUp ? "UP" : "DOWN";
     var uptimeColor = Model.UptimePercent >= 99 ? "text-oco-up" : Model.UptimePercent >= 90 ? "text-oco-warn" : "text-oco-down";
 }
 
@@ -12,10 +8,7 @@
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
             <h1 class="text-2xl font-bold">@Model.Name</h1>
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 @dotColor"></span>
-                <span class="text-sm font-medium @statusColor">@statusLabel</span>
-            </div>
+            <partial name="_StatusBadge" model="Model.Status" />
         </div>
         <div class="flex items-center gap-2">
             <form asp-action="ToggleActive" asp-route-id="@Model.Id" asp-route-returnUrl="@Url.Action("Details", "Monitors", new { id = Model.Id })" method="post" class="inline">
@@ -64,7 +57,7 @@
             </p>
         </div>
         <div class="bg-oco-surface p-5 border-2 border-oco-border">
-            <p class="text-oco-muted text-sm">Status</p>
+            <p class="text-oco-muted text-sm">Monitoring</p>
             <p class="text-2xl font-bold mt-1 @(Model.IsActive ? "text-oco-up" : "text-oco-muted")">
                 @(Model.IsActive ? "Active" : "Paused")
             </p>

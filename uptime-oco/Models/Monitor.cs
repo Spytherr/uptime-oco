@@ -33,4 +33,6 @@ public class Monitor
     public ICollection<Incident> Incidents { get; set; } = [];
 
     public double UptimePercent { get; set; } = 100;
+
+    public MonitorStatus Status { get; set; } = MonitorStatus.Unknown;
 }

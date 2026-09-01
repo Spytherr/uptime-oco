@@ -1,10 +1,19 @@
-@model MonitorStatusDto
+@model MonitorStatus
 
 @{
-    var isUp = Model.IsUp;
-    var badgeClasses = isUp ? "bg-oco-up/10 text-oco-up" : "bg-oco-down/10 text-oco-down";
-    var dotColor = isUp ? "bg-oco-up" : "bg-oco-down";
-    var label = isUp ? "UP" : "DOWN";
+    var badgeClasses = Model switch
+    {
+        MonitorStatus.Up => "bg-oco-up/10 text-oco-up",
+        MonitorStatus.Down => "bg-oco-down/10 text-oco-down",
+        _ => "bg-oco-muted/10 text-oco-muted"
+    };
+    var dotColor = Model switch
+    {
+        MonitorStatus.Up => "bg-oco-up",
+        MonitorStatus.Down => "bg-oco-down",
+        _ => "bg-oco-muted"
+    };
+    var label = Model.ToString().ToUpperInvariant();
 }
 
 <span data-status-badge class="inline-flex items-center gap-2 px-3 py-1 border-2 border-oco-border text-sm font-medium @badgeClasses">

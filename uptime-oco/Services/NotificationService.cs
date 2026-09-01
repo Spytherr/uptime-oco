@@ -48,15 +48,16 @@ public class NotificationService(
         var client = httpClientFactory.CreateClient("notification");
         client.Timeout = TimeSpan.FromSeconds(5);
 
-        if (channel.Type == NotificationType.Discord)
-        {
-            var payload = new { content = message };
-            await client.PostAsJsonAsync(channel.Target, payload, cancellationToken);
-        }
-        else
-        {
-            var payload = new { text = message, title = "uptime-oco" };
-            await client.PostAsJsonAsync(channel.Target, payload, cancellationToken);
-        }
+        using var response = channel.Type == NotificationType.Discord
+            ? await client.PostAsJsonAsync(
+                channel.Target,
+                new { content = message },
+                cancellationToken)
+            : await client.PostAsJsonAsync(
+                channel.Target,
+                new { text = message, title = "uptime-oco" },
+                cancellationToken);
+
+        response.EnsureSuccessStatusCode();
     }
 }

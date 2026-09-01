@@ -19,10 +19,6 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-oco-surface p-5 border-2 border-oco-border">
-            <p class="text-oco-muted text-sm">Total Monitors</p>
-            <p class="text-3xl font-bold mt-1">@Model.TotalMonitors</p>
-        </div>
-        <div class="bg-oco-surface p-5 border-2 border-oco-border">
             <p class="text-oco-muted text-sm">Monitors Up</p>
             <p class="text-3xl font-bold mt-1 text-oco-up">@Model.MonitorsUp</p>
         </div>
@@ -31,8 +27,12 @@
             <p class="text-3xl font-bold mt-1 text-oco-down">@Model.MonitorsDown</p>
         </div>
         <div class="bg-oco-surface p-5 border-2 border-oco-border">
-            <p class="text-oco-muted text-sm">Overall Uptime (last 24 hours)</p>
-            <p class="text-3xl font-bold mt-1">@Model.OverallUptimePercent%</p>
+            <p class="text-oco-muted text-sm">Monitors Paused</p>
+            <p class="text-3xl font-bold mt-1 text-oco-muted">@Model.MonitorsPaused</p>
+        </div>
+        <div class="bg-oco-surface p-5 border-2 border-oco-border">
+            <p class="text-oco-muted text-sm">Monitors Unknown</p>
+            <p class="text-3xl font-bold mt-1 text-oco-muted">@Model.MonitorsUnknown</p>
         </div>
     </div>
 
@@ -68,7 +68,7 @@
             {
                 <div class="flex items-center justify-between p-4 bg-oco-surface-2 border-2 border-oco-border transition-all duration-300" data-monitor-id="@monitor.Id">
                     <div class="flex items-center gap-4">
-                        <partial name="_StatusBadge" model="monitor" />
+                        <partial name="_StatusBadge" model="monitor.Status" />
                         <div>
                             <a asp-controller="Monitors" asp-action="Details" asp-route-id="@monitor.Id"
                                class="font-medium text-oco-text hover:text-oco-accent no-underline">

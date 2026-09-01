@@ -24,6 +24,7 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
             entity.Property(m => m.ExpectedStatusCode).HasDefaultValue(200);
             entity.Property(m => m.TimeoutSeconds).HasDefaultValue(10);
             entity.Ignore(m => m.UptimePercent);
+            entity.Ignore(m => m.Status);
 
             entity.HasOne(m => m.User)
                 .WithMany(u => u.Monitors)

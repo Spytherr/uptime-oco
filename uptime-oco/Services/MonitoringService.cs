@@ -108,6 +108,10 @@ public class MonitoringService(
         }
 
         var incident = await HandleIncidentAsync(monitor, ping, cancellationToken);
+        var status = MonitorStatusCalculator.Calculate(
+            monitor,
+            hasCheckResult: true,
+            hasOpenIncident: incident is { ResolvedAt: null });
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -115,6 +119,7 @@ public class MonitoringService(
         {
             monitorId = monitor.Id,
             monitorName = monitor.Name,
+            status = status.ToString(),
             isSuccess = ping.IsSuccess,
             responseTimeMs = ping.ResponseTimeMs,
             httpStatusCode = ping.HttpStatusCode,

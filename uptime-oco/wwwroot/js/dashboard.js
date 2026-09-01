@@ -291,6 +291,37 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     }
 
+    function getStatusPresentation(status) {
+        var normalizedStatus = String(status || 'Unknown').toUpperCase();
+
+        switch (normalizedStatus) {
+            case 'UP':
+                return {
+                    badge: 'bg-oco-up/10 text-oco-up',
+                    dot: 'bg-oco-up',
+                    label: 'UP'
+                };
+            case 'DOWN':
+                return {
+                    badge: 'bg-oco-down/10 text-oco-down',
+                    dot: 'bg-oco-down',
+                    label: 'DOWN'
+                };
+            case 'PAUSED':
+                return {
+                    badge: 'bg-oco-muted/10 text-oco-muted',
+                    dot: 'bg-oco-muted',
+                    label: 'PAUSED'
+                };
+            default:
+                return {
+                    badge: 'bg-oco-muted/10 text-oco-muted',
+                    dot: 'bg-oco-muted',
+                    label: 'UNKNOWN'
+                };
+        }
+    }
+
     function updateMonitorCard(payload) {
         var cards = document.querySelectorAll('[data-monitor-id]');
         cards.forEach(function (card) {
@@ -303,17 +334,12 @@ document.addEventListener('DOMContentLoaded', function () {
             var label = card.querySelector('[data-status-label]');
             if (badge && dot && label) {
                 var animationClasses = dot.className.split(' ').filter(function (c) { return c.startsWith('animate-'); }).join(' ');
-                if (payload.isSuccess) {
-                    badge.className = 'inline-flex items-center gap-2 px-3 py-1 border-2 border-oco-border text-sm font-medium bg-oco-up/10 text-oco-up';
-                    dot.className = 'w-2 h-2 bg-oco-up ' + animationClasses;
-                    label.className = 'text-sm font-medium text-oco-up';
-                    label.textContent = 'UP';
-                } else {
-                    badge.className = 'inline-flex items-center gap-2 px-3 py-1 border-2 border-oco-border text-sm font-medium bg-oco-down/10 text-oco-down';
-                    dot.className = 'w-2 h-2 bg-oco-down ' + animationClasses;
-                    label.className = 'text-sm font-medium text-oco-down';
-                    label.textContent = 'DOWN';
-                }
+                var status = payload.status || (payload.isSuccess ? 'Up' : 'Down');
+                var presentation = getStatusPresentation(status);
+                badge.className = 'inline-flex items-center gap-2 px-3 py-1 border-2 border-oco-border text-sm font-medium ' + presentation.badge;
+                dot.className = 'w-2 h-2 ' + presentation.dot + ' ' + animationClasses;
+                label.className = 'text-sm font-medium ' + presentation.dot.replace('bg-', 'text-');
+                label.textContent = presentation.label;
             }
 
             var lastCheck = card.querySelector('[data-last-check]');
