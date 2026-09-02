@@ -14,6 +14,8 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
 
     public DbSet<NotificationChannel> NotificationChannels => Set<NotificationChannel>();
 
+    public DbSet<NotificationOutbox> NotificationOutboxes => Set<NotificationOutbox>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -61,6 +63,23 @@ public class UptimeOcoContext(DbContextOptions<UptimeOcoContext> options)
             entity.HasOne(n => n.User)
                 .WithMany(u => u.NotificationChannels)
                 .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<NotificationOutbox>(entity =>
+        {
+            entity.Property(n => n.Reason).HasMaxLength(500);
+            entity.Property(n => n.LastError).HasMaxLength(2000);
+            entity.HasIndex(n => new { n.ProcessedAt, n.FailedAt, n.NextAttemptAt });
+
+            entity.HasOne(n => n.Incident)
+                .WithMany()
+                .HasForeignKey(n => n.IncidentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(n => n.NotificationChannel)
+                .WithMany()
+                .HasForeignKey(n => n.NotificationChannelId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
 namespace uptime_oco;
@@ -8,8 +9,8 @@ namespace uptime_oco;
 public class MonitoringService(
     UptimeOcoContext context,
     IHttpClientFactory httpClientFactory,
-    INotificationService notificationService,
     IHubContext<MonitorHub> hubContext,
+    IOptions<MonitoringOptions> monitoringOptions,
     ILogger<MonitoringService> logger) : IMonitoringService
 {
     private HttpClient CreateClient(int timeoutSeconds)
@@ -55,6 +56,10 @@ public class MonitoringService(
                     : $"Expected HTTP {monitor.ExpectedStatusCode}, received HTTP {statusCode}",
                 CheckedAt = DateTime.UtcNow
             };
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -113,6 +118,26 @@ public class MonitoringService(
             hasCheckResult: true,
             hasOpenIncident: incident is { ResolvedAt: null });
 
+        if (incident is not null)
+        {
+            var channels = await context.NotificationChannels
+                .Where(c => c.UserId == monitor.UserId && c.IsEnabled)
+                .ToListAsync(cancellationToken);
+
+            foreach (var channel in channels)
+            {
+                context.NotificationOutboxes.Add(new NotificationOutbox
+                {
+                    Incident = incident,
+                    NotificationChannelId = channel.Id,
+                    Reason = incident.Reason,
+                    StartedAt = incident.StartedAt,
+                    ResolvedAt = incident.ResolvedAt,
+                    IsResolved = incident.ResolvedAt.HasValue
+                });
+            }
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
         await hubContext.Clients.User(monitor.UserId).SendAsync("PingReceived", new
@@ -129,8 +154,6 @@ public class MonitoringService(
 
         if (incident is not null)
         {
-            await notificationService.NotifyIncidentAsync(incident, monitor, cancellationToken);
-
             await hubContext.Clients.User(monitor.UserId).SendAsync("IncidentUpdate", new
             {
                 monitorId = monitor.Id,
@@ -159,10 +182,23 @@ public class MonitoringService(
 
         logger.LogInformation("Checking {Count} due monitors", monitors.Count);
 
-        var checkTasks = monitors.Select(m => PerformHttpCheckAsync(m, cancellationToken)).ToList();
+        var maxConcurrentChecks = Math.Max(monitoringOptions.Value.MaxConcurrentChecks, 1);
+        using var semaphore = new SemaphoreSlim(maxConcurrentChecks);
+        var checkTasks = monitors.Select(async monitor =>
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                return (monitor, ping: await PerformHttpCheckAsync(monitor, cancellationToken));
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }).ToList();
         var results = await Task.WhenAll(checkTasks);
 
-        foreach (var (monitor, ping) in monitors.Zip(results))
+        foreach (var (monitor, ping) in results)
         {
             if (cancellationToken.IsCancellationRequested)
                 break;

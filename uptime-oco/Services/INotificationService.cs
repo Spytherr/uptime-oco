@@ -2,5 +2,9 @@ namespace uptime_oco;
 
 public interface INotificationService
 {
-    Task NotifyIncidentAsync(Incident incident, Monitor monitor, CancellationToken cancellationToken = default);
+    Task SendIncidentAsync(
+        NotificationOutbox notification,
+        Monitor monitor,
+        NotificationChannel channel,
+        CancellationToken cancellationToken = default);
 }

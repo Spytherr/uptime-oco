@@ -34,10 +34,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.Configure<MonitoringOptions>(
+    builder.Configuration.GetSection("Monitoring"));
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IMonitoringService, MonitoringService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<MonitorBackgroundService>();
+builder.Services.AddHostedService<NotificationOutboxService>();
 builder.Services.AddHostedService<DataRetentionService>();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<UptimeOcoContext>();
