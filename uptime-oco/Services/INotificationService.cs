@@ -7,4 +7,8 @@ public interface INotificationService
         Monitor monitor,
         NotificationChannel channel,
         CancellationToken cancellationToken = default);
+
+    Task SendTestAsync(
+        NotificationChannel channel,
+        CancellationToken cancellationToken = default);
 }

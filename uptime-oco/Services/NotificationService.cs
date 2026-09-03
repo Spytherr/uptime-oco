@@ -1,10 +1,11 @@
-using System.Net.Http.Json;
-
 namespace uptime_oco;
 
-public class NotificationService(IHttpClientFactory httpClientFactory) : INotificationService
+public class NotificationService(IEnumerable<INotificationSender> senders) : INotificationService
 {
-    public async Task SendIncidentAsync(
+    private readonly IReadOnlyDictionary<NotificationType, INotificationSender> sendersByType =
+        senders.ToDictionary(sender => sender.Type);
+
+    public Task SendIncidentAsync(
         NotificationOutbox notification,
         Monitor monitor,
         NotificationChannel channel,
@@ -16,26 +17,31 @@ public class NotificationService(IHttpClientFactory httpClientFactory) : INotifi
             ? $" (down for {(notification.ResolvedAt.Value - notification.StartedAt).TotalMinutes:F0} min)"
             : "";
 
-        var message = $"{title}: **{monitor.Name}**{duration}\nURL: {monitor.Url}\nReason: {notification.Reason}\nStatus: {status}";
+        var message = new NotificationMessage(
+            $"{title}: **{monitor.Name}**{duration}\nURL: {monitor.Url}\nReason: {notification.Reason}\nStatus: {status}",
+            "uptime-oco");
 
-        await SendAsync(channel, message, cancellationToken);
+        return GetSender(channel.Type).SendAsync(channel.Target, message, cancellationToken);
     }
 
-    private async Task SendAsync(NotificationChannel channel, string message, CancellationToken cancellationToken)
+    public Task SendTestAsync(
+        NotificationChannel channel,
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("notification");
-        client.Timeout = TimeSpan.FromSeconds(5);
+        var message = new NotificationMessage(
+            $"**Test notification** from uptime-oco\nChannel: {channel.Name}\nTime: {DateTime.UtcNow:O}",
+            "uptime-oco test");
 
-        using var response = channel.Type == NotificationType.Discord
-            ? await client.PostAsJsonAsync(
-                channel.Target,
-                new { content = message },
-                cancellationToken)
-            : await client.PostAsJsonAsync(
-                channel.Target,
-                new { text = message, title = "uptime-oco" },
-                cancellationToken);
+        return GetSender(channel.Type).SendAsync(channel.Target, message, cancellationToken);
+    }
 
-        response.EnsureSuccessStatusCode();
+    private INotificationSender GetSender(NotificationType type)
+    {
+        if (!sendersByType.TryGetValue(type, out var sender))
+        {
+            throw new NotSupportedException($"Notification type '{type}' is not supported.");
+        }
+
+        return sender;
     }
 }

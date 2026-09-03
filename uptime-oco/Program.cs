@@ -38,6 +38,8 @@ builder.Services.Configure<MonitoringOptions>(
     builder.Configuration.GetSection("Monitoring"));
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IMonitoringService, MonitoringService>();
+builder.Services.AddSingleton<INotificationSender, DiscordNotificationSender>();
+builder.Services.AddSingleton<INotificationSender, WebhookNotificationSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<MonitorBackgroundService>();
 builder.Services.AddHostedService<NotificationOutboxService>();

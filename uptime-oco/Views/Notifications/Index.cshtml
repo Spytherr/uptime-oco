@@ -22,10 +22,8 @@
     <div class="space-y-3">
         @foreach (var channel in Model)
         {
-            var typeLabel = channel.Type == NotificationType.Discord ? "Discord" : "Webhook";
-            var typeColor = channel.Type == NotificationType.Discord
-                ? "border-2 border-oco-border bg-indigo-500/10 text-indigo-400"
-                : "border-2 border-oco-border bg-blue-500/10 text-blue-400";
+            var typeLabel = channel.Type.ToString();
+            var typeColor = "border-2 border-oco-border bg-oco-surface-2 text-oco-muted";
 
             <div class="flex items-center justify-between p-4 bg-oco-surface border-2 border-oco-border">
                 <div class="flex items-center gap-4">

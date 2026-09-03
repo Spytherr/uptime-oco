@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Json;
 
 namespace uptime_oco;
 
@@ -11,7 +10,7 @@ namespace uptime_oco;
 public class NotificationsController(
     UptimeOcoContext context,
     UserManager<ApplicationUser> userManager,
-    IHttpClientFactory httpClientFactory,
+    INotificationService notificationService,
     IValidator<CreateNotificationViewModel> createValidator,
     IValidator<EditNotificationViewModel> editValidator) : Controller
 {
@@ -168,24 +167,9 @@ public class NotificationsController(
             return NotFound();
         }
 
-        var client = httpClientFactory.CreateClient("notification");
-        client.Timeout = TimeSpan.FromSeconds(10);
-
-        var message = $"**Test notification** from uptime-oco\nChannel: {channel.Name}\nTime: {DateTime.UtcNow:O}";
-
         try
         {
-            using var response = channel.Type == NotificationType.Discord
-                ? await client.PostAsJsonAsync(
-                    channel.Target,
-                    new { content = message },
-                    HttpContext.RequestAborted)
-                : await client.PostAsJsonAsync(
-                    channel.Target,
-                    new { text = message, title = "uptime-oco test" },
-                    HttpContext.RequestAborted);
-
-            response.EnsureSuccessStatusCode();
+            await notificationService.SendTestAsync(channel, HttpContext.RequestAborted);
             TempData["TestResult"] = "Test notification sent successfully.";
         }
         catch (Exception)
