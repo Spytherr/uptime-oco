@@ -7,6 +7,7 @@ services:
       - "8080:8080"
     environment:
       - ConnectionStrings__UptimeOcoContext=Data Source=/app/data/uptime-oco.db
+      - DataProtection__KeysPath=/app/data/keys
     volumes:
       - oco-data:/app/data
     healthcheck:

@@ -23,6 +23,7 @@ RUN apt-get update \
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ConnectionStrings__UptimeOcoContext="Data Source=/app/data/uptime-oco.db"
+ENV DataProtection__KeysPath=/app/data/keys
 COPY --from=build /app/publish .
 VOLUME /app/data
 EXPOSE 8080
