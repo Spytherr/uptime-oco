@@ -54,7 +54,7 @@
                     {
                         <form asp-action="Resolve" asp-route-id="@incident.Id" method="post" class="inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-up/10 text-oco-up hover:bg-oco-up/20 transition-colors">
+                            <button type="submit" class="oco-button oco-button-success">
                                 Resolve
                             </button>
                         </form>
@@ -70,7 +70,7 @@
             @if (Model.HasPreviousPage)
             {
                 <a asp-action="Index" asp-route-filter="@filter" asp-route-page="@(Model.PageIndex - 1)"
-                   class="px-3 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
+                   class="oco-button oco-button-secondary">
                     Prev
                 </a>
             }
@@ -80,7 +80,7 @@
             @if (Model.HasNextPage)
             {
                 <a asp-action="Index" asp-route-filter="@filter" asp-route-page="@(Model.PageIndex + 1)"
-                   class="px-3 py-2 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline text-sm">
+                   class="oco-button oco-button-secondary">
                     Next
                 </a>
             }

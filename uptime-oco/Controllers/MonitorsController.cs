@@ -85,11 +85,30 @@ public class MonitorsController(
             ? Math.Round((double)uptimeStats.Success / uptimeStats.Total * 100, 2)
             : 100;
 
+        var responseTimeSeries = await context.PingResults
+            .AsNoTracking()
+            .Where(p => p.MonitorId == monitor.Id
+                && p.CheckedAt >= cutoff
+                && p.ResponseTimeMs.HasValue)
+            .OrderBy(p => p.CheckedAt)
+            .Select(p => new ResponseTimePoint
+            {
+                MonitorId = p.MonitorId,
+                CheckedAt = p.CheckedAt,
+                ResponseTimeMs = p.ResponseTimeMs!.Value,
+                MonitorName = monitor.Name
+            })
+            .ToListAsync();
+
         var latestPing = monitor.PingResults.OrderByDescending(p => p.CheckedAt).FirstOrDefault();
         var hasOpenIncident = monitor.Incidents.Any(i => i.ResolvedAt is null);
         monitor.Status = MonitorStatusCalculator.Calculate(monitor, latestPing is not null, hasOpenIncident);
 
-        return View(monitor);
+        return View(new MonitorDetailsViewModel
+        {
+            Monitor = monitor,
+            ResponseTimeSeries = responseTimeSeries
+        });
     }
 
     [HttpGet]

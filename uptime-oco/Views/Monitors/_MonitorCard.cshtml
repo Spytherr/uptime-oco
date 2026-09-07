@@ -32,16 +32,14 @@
             }
         </div>
         <div class="flex items-center gap-1">
-            <a asp-action="Edit" asp-route-id="@Model.Id"
-               class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">Edit</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="oco-button oco-button-secondary">Edit</a>
             <form asp-action="ToggleActive" asp-route-id="@Model.Id" method="post" class="inline">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-warn transition-colors">
+                <button type="submit" class="oco-button @(Model.IsActive ? "oco-button-warning" : "oco-button-success")">
                     @(Model.IsActive ? "Pause" : "Resume")
                 </button>
             </form>
-            <a asp-action="Delete" asp-route-id="@Model.Id"
-               class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-down transition-colors no-underline">Delete</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="oco-button oco-button-danger">Delete</a>
         </div>
     </div>
 </div>

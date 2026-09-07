@@ -22,10 +22,10 @@
 
         <form asp-action="Delete" method="post" class="flex gap-3">
             <input type="hidden" asp-for="Id" />
-            <button type="submit" class="px-5 py-2.5 border-2 border-oco-border bg-oco-down text-white hover:opacity-90 transition-opacity font-medium">
+            <button type="submit" class="oco-button oco-button-danger-solid oco-button-lg font-medium">
                 Yes, Delete
             </button>
-            <a asp-action="Index" class="px-5 py-2.5 border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">
+            <a asp-action="Index" class="oco-button oco-button-secondary oco-button-lg">
                 Cancel
             </a>
         </form>

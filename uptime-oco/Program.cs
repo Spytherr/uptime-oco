@@ -96,8 +96,18 @@ builder.Services.AddHostedService<NotificationOutboxService>();
 builder.Services.AddHostedService<DataRetentionService>();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<UptimeOcoContext>();
-builder.Services.AddHttpClient("monitor");
-builder.Services.AddHttpClient("notification");
+
+var allowPrivateNetworks = builder.Configuration.GetValue(
+    "OutboundHttp:AllowPrivateNetworks",
+    true);
+builder.Services.AddHttpClient("monitor")
+    .ConfigurePrimaryHttpMessageHandler(() =>
+        OutboundHttpHandlerFactory.Create(allowPrivateNetworks))
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+builder.Services.AddHttpClient("notification")
+    .ConfigurePrimaryHttpMessageHandler(() =>
+        OutboundHttpHandlerFactory.Create(allowPrivateNetworks))
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 builder.Services.AddOutputCache();
 builder.Services.AddRateLimiter(options =>
 {

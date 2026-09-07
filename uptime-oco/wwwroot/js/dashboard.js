@@ -3,15 +3,17 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    var data = window.dashboardData;
+    var data = window.dashboardData || window.monitorDetailsData;
     if (!data) {
         return;
     }
 
-    var responseTimeEl = document.querySelector('#responseTimeChart');
+    var isDashboard = Boolean(window.dashboardData);
+    var responseTimeEl = document.querySelector('#responseTimeChart, #monitorResponseTimeChart');
     var responseTimeChart;
     var statusCodeChart;
-    var currentResponseTimePoints = [];
+    var currentResponseTimeSeries = [];
+    var monitorSelect = document.querySelector('#responseTimeMonitorSelect');
 
     function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, function (character) {
@@ -77,8 +79,17 @@ document.addEventListener('DOMContentLoaded', function () {
         return pointsWithGaps;
     }
 
-    function getResponseTimePoints(monitorId) {
+    function getSelectedMonitorId() {
+        if (monitorSelect) {
+            return monitorSelect.value;
+        }
+
+        return data.monitorId != null ? String(data.monitorId) : '';
+    }
+
+    function getResponseTimeSeries(monitorId) {
         var points = data.responseTime || [];
+        var pointsByMonitor = {};
 
         if (monitorId !== '') {
             points = points.filter(function (point) {
@@ -86,36 +97,50 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        return addGapBreaks(toChartPoints(points));
+        points.forEach(function (point) {
+            var key = String(point.monitorId);
+            if (!pointsByMonitor[key]) {
+                pointsByMonitor[key] = [];
+            }
+            pointsByMonitor[key].push(point);
+        });
+
+        return Object.keys(pointsByMonitor)
+            .map(function (key) {
+                var monitorPoints = toChartPoints(pointsByMonitor[key]);
+                return {
+                    name: monitorPoints[0] && monitorPoints[0].monitorName
+                        ? monitorPoints[0].monitorName
+                        : 'Monitor ' + key,
+                    data: addGapBreaks(monitorPoints)
+                };
+            })
+            .sort(function (a, b) { return a.name.localeCompare(b.name); });
+    }
+
+    function getAllSeriesPoints(series) {
+        return series
+            .reduce(function (points, item) { return points.concat(item.data); }, [])
+            .filter(function (point) { return Number.isFinite(point.x); })
+            .sort(function (a, b) { return a.x - b.x; });
     }
 
     function resetResponseTimeZoom() {
-        if (!responseTimeChart || currentResponseTimePoints.length < 2) {
+        var points = getAllSeriesPoints(currentResponseTimeSeries);
+        if (!responseTimeChart || points.length < 2) {
             return;
         }
 
-        var first = currentResponseTimePoints[0].x;
-        var last = currentResponseTimePoints[currentResponseTimePoints.length - 1].x;
+        var first = points[0].x;
+        var last = points[points.length - 1].x;
 
         if (first < last) {
             responseTimeChart.zoomX(first, last);
         }
     }
 
-    function selectedMonitorName(monitorId) {
-        if (monitorId === '') {
-            return 'Response Time (all monitors)';
-        }
-
-        var selectedPoint = (data.responseTime || []).find(function (point) {
-            return String(point.monitorId) === String(monitorId);
-        });
-
-        return selectedPoint ? 'Response Time - ' + selectedPoint.monitorName : 'Response Time';
-    }
-
     if (responseTimeEl && data.responseTime) {
-        currentResponseTimePoints = getResponseTimePoints('');
+        currentResponseTimeSeries = getResponseTimeSeries(getSelectedMonitorId());
 
         responseTimeChart = new ApexCharts(responseTimeEl, {
             chart: {
@@ -149,10 +174,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             },
-            series: [{
-                name: 'Response Time (all monitors)',
-                data: currentResponseTimePoints
-            }],
+            series: currentResponseTimeSeries,
+            colors: ['#c9c9c9', '#22c55e', '#f59e0b', '#60a5fa', '#f472b6', '#a78bfa'],
+            legend: {
+                show: currentResponseTimeSeries.length > 1,
+                position: 'bottom',
+                labels: { colors: '#929292' }
+            },
             xaxis: {
                 type: 'datetime',
                 tickAmount: 8,
@@ -170,8 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             stroke: {
                 curve: 'straight',
-                width: 3,
-                colors: ['#c9c9c9'],
+                width: 2,
                 connectNullData: false
             },
             markers: {
@@ -203,14 +230,10 @@ document.addEventListener('DOMContentLoaded', function () {
             resetBtn.addEventListener('click', resetResponseTimeZoom);
         }
 
-        var monitorSelect = document.querySelector('#responseTimeMonitorSelect');
         if (monitorSelect) {
             monitorSelect.addEventListener('change', function () {
-                currentResponseTimePoints = getResponseTimePoints(monitorSelect.value);
-                responseTimeChart.updateSeries([{
-                    name: selectedMonitorName(monitorSelect.value),
-                    data: currentResponseTimePoints
-                }]);
+                currentResponseTimeSeries = getResponseTimeSeries(getSelectedMonitorId());
+                responseTimeChart.updateSeries(currentResponseTimeSeries);
                 setTimeout(resetResponseTimeZoom, 0);
             });
         }
@@ -370,27 +393,31 @@ document.addEventListener('DOMContentLoaded', function () {
             updateMonitorCard(payload);
 
             if (responseTimeChart && payload.responseTimeMs != null) {
-                var selectedId = monitorSelect ? monitorSelect.value : '';
-                if (selectedId === '' || String(selectedId) === String(payload.monitorId)) {
-                    var point = {
-                        x: new Date(payload.checkedAt).getTime(),
-                        y: payload.responseTimeMs,
-                        monitorId: payload.monitorId,
-                        monitorName: payload.monitorName
-                    };
-                    currentResponseTimePoints.push(point);
-                    currentResponseTimePoints.sort(function (a, b) { return a.x - b.x; });
+                var selectedId = getSelectedMonitorId();
+                var monitorMatches = selectedId === '' || String(selectedId) === String(payload.monitorId);
+                var point = {
+                    checkedAt: payload.checkedAt,
+                    responseTimeMs: payload.responseTimeMs,
+                    monitorId: payload.monitorId,
+                    monitorName: payload.monitorName
+                };
 
+                if (isDashboard || monitorMatches) {
+                    data.responseTime.push(point);
+                    var cutoff = Date.now() - 24 * 60 * 60 * 1000;
+                    data.responseTime = data.responseTime.filter(function (item) {
+                        return new Date(item.checkedAt).getTime() >= cutoff;
+                    });
+                }
+
+                if (monitorMatches) {
                     var globals = responseTimeChart.w.globals;
                     var zoomMin = globals.minX;
                     var zoomMax = globals.maxX;
+                    currentResponseTimeSeries = getResponseTimeSeries(selectedId);
+                    responseTimeChart.updateSeries(currentResponseTimeSeries, false);
 
-                    responseTimeChart.updateSeries([{
-                        name: selectedMonitorName(selectedId),
-                        data: currentResponseTimePoints
-                    }], false);
-
-                    if (zoomMax - zoomMin < (currentResponseTimePoints[currentResponseTimePoints.length - 1].x - currentResponseTimePoints[0].x) - 1000) {
+                    if (Number.isFinite(zoomMin) && Number.isFinite(zoomMax) && zoomMax > zoomMin) {
                         responseTimeChart.zoomX(zoomMin, zoomMax);
                     }
                 }

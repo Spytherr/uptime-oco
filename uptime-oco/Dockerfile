@@ -25,7 +25,9 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ConnectionStrings__UptimeOcoContext="Data Source=/app/data/uptime-oco.db"
 ENV DataProtection__KeysPath=/app/data/keys
 COPY --from=build /app/publish .
+RUN mkdir -p /app/data && chown -R ${APP_UID}:${APP_UID} /app/data
 VOLUME /app/data
+USER $APP_UID
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD curl --fail --silent http://localhost:8080/health || exit 1
 ENTRYPOINT ["dotnet", "uptime-oco.dll"]

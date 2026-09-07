@@ -61,7 +61,7 @@ public class MonitoringService(
         {
             throw;
         }
-        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             sw.Stop();
             ping = new PingResult
@@ -77,7 +77,7 @@ public class MonitoringService(
         catch (Exception ex)
         {
             sw.Stop();
-            logger.LogWarning(ex, "HTTP check failed for monitor {MonitorId} ({Url})", monitor.Id, monitor.Url);
+            logger.LogWarning(ex, "HTTP check failed for monitor {MonitorId}", monitor.Id);
 
             ping = new PingResult
             {

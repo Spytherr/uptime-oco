@@ -48,7 +48,7 @@
                             <option value="@monitor.Id">@monitor.Name</option>
                         }
                     </select>
-                    <button id="resetZoomBtn" class="px-3 py-1.5 text-sm bg-oco-surface-2 border-2 border-oco-border text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors">
+                    <button id="resetZoomBtn" type="button" class="oco-button oco-button-secondary">
                         Reset Zoom
                     </button>
                 </div>
@@ -62,7 +62,10 @@
     </div>
 
     <div class="bg-oco-surface p-5 border-2 border-oco-border">
-        <h2 class="text-lg font-semibold mb-4">Monitors</h2>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="text-lg font-semibold">Monitors</h2>
+            <a asp-controller="Monitors" asp-action="Create" class="oco-button oco-button-primary">+ Add monitor</a>
+        </div>
         <div class="space-y-3">
             @foreach (var monitor in Model.MonitorStatuses)
             {

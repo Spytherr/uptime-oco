@@ -7,7 +7,7 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Notification Channels</h1>
-        <a asp-action="Create" class="px-4 py-2 border-2 border-oco-border bg-oco-accent text-oco-text hover:bg-oco-surface hover:text-oco-text transition-colors no-underline text-sm font-medium">
+        <a asp-action="Create" class="oco-button oco-button-primary oco-button-lg font-medium">
             + New Channel
         </a>
     </div>
@@ -45,14 +45,14 @@
                     <div class="flex items-center gap-1">
                         <form asp-action="Test" asp-route-id="@channel.Id" method="post" class="inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-accent transition-colors">
+                            <button type="submit" class="oco-button oco-button-secondary">
                                 Test
                             </button>
                         </form>
                         <a asp-action="Edit" asp-route-id="@channel.Id"
-                           class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-text transition-colors no-underline">Edit</a>
+                           class="oco-button oco-button-secondary">Edit</a>
                         <a asp-action="Delete" asp-route-id="@channel.Id"
-                           class="px-3 py-1.5 text-sm border-2 border-oco-border bg-oco-surface text-oco-text hover:bg-oco-surface-2 hover:text-oco-down transition-colors no-underline">Delete</a>
+                           class="oco-button oco-button-danger">Delete</a>
                     </div>
                 </div>
             </div>
