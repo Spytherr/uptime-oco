@@ -1,8 +1,10 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Net;
 using System.Threading.RateLimiting;
 using uptime_oco;
 
@@ -15,6 +17,35 @@ Directory.CreateDirectory(dataProtectionKeysPath);
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
     .SetApplicationName("uptime-oco");
+
+var knownProxyAddresses = builder.Configuration
+    .GetSection("ReverseProxy:KnownProxies")
+    .GetChildren()
+    .Select(section => section.Value)
+    .Where(value => !string.IsNullOrWhiteSpace(value))
+    .Select(value => value!)
+    .ToArray();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+        | ForwardedHeaders.XForwardedProto
+        | ForwardedHeaders.XForwardedHost;
+    options.ForwardLimit = 1;
+    options.KnownProxies.Clear();
+    options.KnownIPNetworks.Clear();
+
+    foreach (var address in knownProxyAddresses)
+    {
+        if (!IPAddress.TryParse(address, out var ipAddress))
+        {
+            throw new InvalidOperationException(
+                $"Invalid ReverseProxy:KnownProxies address '{address}'.");
+        }
+
+        options.KnownProxies.Add(ipAddress);
+    }
+});
 
 var connectionString = builder.Configuration.GetConnectionString("UptimeOcoContext")
     ?? "Data Source=uptime-oco.db";
@@ -39,6 +70,16 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/Login";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 builder.Services.AddControllersWithViews();
@@ -85,6 +126,8 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.MigrateDatabase();
 
