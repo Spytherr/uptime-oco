@@ -140,11 +140,7 @@ var app = builder.Build();
 app.UseForwardedHeaders();
 
 app.MigrateDatabase();
-
-if (app.Environment.IsDevelopment())
-{
-    await app.SeedDemoDataAsync();
-}
+await app.EnsureInitialAdminAsync();
 
 if (!app.Environment.IsDevelopment())
 {

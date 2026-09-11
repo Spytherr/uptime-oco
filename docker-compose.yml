@@ -8,6 +8,9 @@ services:
     environment:
       - ConnectionStrings__UptimeOcoContext=Data Source=/app/data/uptime-oco.db
       - DataProtection__KeysPath=/app/data/keys
+      # Optional: automatically create the initial admin user on first run
+      # - INITIAL_ADMIN_EMAIL=admin@example.com
+      # - INITIAL_ADMIN_PASSWORD=ChangeMe123!
     volumes:
       - oco-data:/app/data
     healthcheck:
